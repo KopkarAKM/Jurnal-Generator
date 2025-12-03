@@ -1,548 +1,896 @@
-import React, { useState, useEffect } from 'react';
-import { Upload, FileText, Download, Trash2, Plus, ArrowRight, CheckCircle, AlertCircle, Search, Filter, Edit3, Save } from 'lucide-react';
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Jurnal Generator - SAK EP (Persistent)</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- SweetAlert2 for nice popups -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body class="bg-slate-50 font-sans text-slate-800 p-4 md:p-8 min-h-screen">
 
-// --- DATABASE MASTER AKUN SAK EP (HARDCODED) ---
-const MASTER_AKUN_SAK_EP = [
-  // ASET
-  { kode: 'I.1.1.1', nama: 'Kas Kecil AKM', kategori: 'ASET' },
-  { kode: 'I.1.2.1', nama: 'Bank Mandiri Induk AKM', kategori: 'ASET' },
-  { kode: 'I.3.1.1', nama: 'Piutang Simpan Pinjam Anggota', kategori: 'ASET' },
-  { kode: 'I.3.1.2', nama: 'Piutang Voucer Belanja Anggota', kategori: 'ASET' },
-  { kode: 'I.3.1.3', nama: 'Piutang Adamart Anggota', kategori: 'ASET' },
-  { kode: 'I.3.1.4', nama: 'Piutang Tiket Anggota', kategori: 'ASET' },
-  
-  // KEWAJIBAN
-  { kode: 'II.1.1', nama: 'Simpanan Sukarela', kategori: 'KEWAJIBAN' },
-  { kode: 'II.2.1', nama: 'Utang Payboss / Titipan', kategori: 'KEWAJIBAN' },
-  { kode: 'II.7', nama: 'Liabilitas Lainnya', kategori: 'KEWAJIBAN' },
-  
-  // PENDAPATAN
-  { kode: 'IV.1.1', nama: 'Pendapatan Adamart Anggota', kategori: 'PENDAPATAN' },
-  { kode: 'IV.1.2', nama: 'Pendapatan Kredit Uang Anggota', kategori: 'PENDAPATAN' },
-  { kode: 'IV.1.6', nama: 'Pendapatan Administrasi Bank', kategori: 'PENDAPATAN' },
-  { kode: 'IV.2.13', nama: 'Pendapatan Bunga Bank', kategori: 'PENDAPATAN' },
-  { kode: 'IV.1.3', nama: 'Pendapatan Tiket Anggota', kategori: 'PENDAPATAN' },
-  
-  // BEBAN
-  { kode: 'V.3.1', nama: 'Beban Operasional', kategori: 'BEBAN' },
-  { kode: 'V.3.2', nama: 'Beban ATK', kategori: 'BEBAN' },
-  { kode: 'V.3.4', nama: 'Biaya BBM', kategori: 'BEBAN' },
-  { kode: 'V.3.7', nama: 'Beban Listrik', kategori: 'BEBAN' },
-  { kode: 'V.3.9', nama: 'Beban Telpon dan Internet', kategori: 'BEBAN' },
-  { kode: 'V.3.11', nama: 'Biaya Promosi', kategori: 'BEBAN' },
-  { kode: 'V.3.13', nama: 'Biaya Perbaikan & Pemeliharaan Kendaraan', kategori: 'BEBAN' },
-  { kode: 'V.3.17', nama: 'Biaya Administrasi Bank', kategori: 'BEBAN' },
-  { kode: 'V.3.18', nama: 'Perjalanan Dinas', kategori: 'BEBAN' },
-  { kode: 'V.3.20', nama: 'Beban Gaji Karyawan dan THR', kategori: 'BEBAN' },
-  { kode: 'V.3.22', nama: 'Beban BPJS', kategori: 'BEBAN' },
-  { kode: 'V.4.1', nama: 'Beban Honor Pengurus dan Pengawas', kategori: 'BEBAN' },
-];
-
-// --- MAPPING AWAL ---
-const INITIAL_MAPPINGS = [
-  { id: 1, keyword: 'YULIANT', akun: 'Piutang Simpan Pinjam Anggota', kode: 'I.3.1.1' },
-  { id: 2, keyword: 'ZAINAL', akun: 'Piutang Simpan Pinjam Anggota', kode: 'I.3.1.1' },
-  { id: 3, keyword: 'TARIK TUNAI', akun: 'Kas Kecil AKM', kode: 'I.1.1.1' },
-  { id: 4, keyword: 'OPRASIONAL', akun: 'Beban Operasional', kode: 'V.3.1' },
-  { id: 5, keyword: 'ADM', akun: 'Biaya Administrasi Bank', kode: 'V.3.17' },
-  { id: 6, keyword: 'BIAYA', akun: 'Biaya Administrasi Bank', kode: 'V.3.17' },
-  { id: 7, keyword: 'BUNGA', akun: 'Pendapatan Bunga Bank', kode: 'IV.2.13' },
-  { id: 8, keyword: 'PAJAK', akun: 'Biaya Administrasi Bank', kode: 'V.3.17' },
-  { id: 9, keyword: 'GAJI', akun: 'Beban Gaji Karyawan dan THR', kode: 'V.3.20' },
-  { id: 10, keyword: 'HONOR', akun: 'Beban Honor Pengurus dan Pengawas', kode: 'V.4.1' },
-  { id: 11, keyword: 'PAYBOSS', akun: 'Utang Payboss / Titipan', kode: 'II.2.1' },
-  { id: 12, keyword: 'LISTRIK', akun: 'Beban Listrik', kode: 'V.3.7' },
-  { id: 13, keyword: 'ATK', akun: 'Beban ATK', kode: 'V.3.2' },
-  { id: 14, keyword: 'BBM', akun: 'Biaya BBM', kode: 'V.3.4' },
-];
-
-export default function App() {
-  const [mappings, setMappings] = useState(INITIAL_MAPPINGS);
-  const [fileData, setFileData] = useState([]);
-  const [processedData, setProcessedData] = useState({ masuk: [], keluar: [] });
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [activeTab, setActiveTab] = useState('upload'); 
-  const [newMap, setNewMap] = useState({ keyword: '', akun: '', kode: '' });
-  const [unidentifiedCount, setUnidentifiedCount] = useState(0);
-  
-  // STATE BARU: Filter Mode & Editing
-  const [showOnlyManual, setShowOnlyManual] = useState(false);
-  // Kita simpan status apakah data sudah diedit manual agar tidak tertimpa auto-process
-  const [hasManualEdits, setHasManualEdits] = useState(false);
-
-  // Auto-process saat mapping berubah, TAPI HANYA JIKA belum ada edit manual
-  // Agar kerjaan manual user tidak hilang saat dia pindah tab
-  useEffect(() => {
-    if (fileData.length > 0 && !hasManualEdits) {
-      processJurnal(fileData);
-    }
-  }, [mappings, fileData]);
-
-  // --- FUNGSI MAPPING ---
-  const handleAccountSelect = (e) => {
-    const selectedKode = e.target.value;
-    const selectedAccount = MASTER_AKUN_SAK_EP.find(item => item.kode === selectedKode);
-    if (selectedAccount) {
-      setNewMap({ ...newMap, akun: selectedAccount.nama, kode: selectedAccount.kode });
-    }
-  };
-
-  const addMapping = () => {
-    if (newMap.keyword && newMap.akun) {
-      setMappings([...mappings, { ...newMap, id: Date.now() }]);
-      setNewMap({ keyword: '', akun: '', kode: '' });
-      setHasManualEdits(false); // Reset manual edits flag to allow re-process
-    }
-  };
-
-  const removeMapping = (id) => {
-    setMappings(mappings.filter(m => m.id !== id));
-    setHasManualEdits(false);
-  };
-
-  // --- PARSE CSV ---
-  const parseCSV = (text) => {
-    const lines = text.split('\n');
-    const result = [];
-    const splitCSVLine = (line) => {
-        const regex = /,(?=(?:(?:[^"]*"){2})*[^"]*$)/; 
-        return line.split(regex).map(s => s.replace(/^"|"$/g, '').trim());
-    };
-    lines.forEach((line) => {
-        if (!line.trim()) return;
-        try { result.push(splitCSVLine(line)); } catch (e) {}
-    });
-    return result;
-  };
-
-  const cleanCurrency = (str) => {
-      if (typeof str === 'number') return str;
-      if (!str) return 0;
-      let clean = str.toString().replace(/[^0-9,.-]/g, '');
-      if (clean.includes(',') && !clean.includes('.')) {
-         clean = clean.replace(',', '.');
-      } else if (clean.includes('.') && clean.includes(',')) {
-          const lastComma = clean.lastIndexOf(',');
-          const lastDot = clean.lastIndexOf('.');
-          if (lastComma > lastDot) clean = clean.replace(/\./g, '').replace(',', '.');
-          else clean = clean.replace(/,/g, '');
-      }
-      return parseFloat(clean) || 0;
-  };
-
-  // --- PROSES DATA ---
-  const handleFileUpload = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    setIsProcessing(true);
-    setHasManualEdits(false); // Reset edit flag on new file
-    const reader = new FileReader();
-    reader.onload = (evt) => {
-      const bstr = evt.target.result;
-      const data = parseCSV(bstr); 
-      let headerRowIndex = 0;
-      data.forEach((row, index) => {
-        const rowStr = JSON.stringify(row).toUpperCase();
-        if ((rowStr.includes("TANGGAL") || rowStr.includes("TGL") || rowStr.includes("VAL")) && 
-            (rowStr.includes("URAIAN") || rowStr.includes("KETERANGAN"))) {
-           headerRowIndex = index;
-        }
-      });
-      
-      let colIdx = { tgl: 1, ket: 2, deb: 4, kre: 5 }; 
-      if (data[headerRowIndex]) {
-          const headerRow = data[headerRowIndex].map(s => s ? s.toUpperCase() : "");
-          headerRow.forEach((col, i) => {
-              if (col.includes("TGL") || col.includes("TANGGAL")) colIdx.tgl = i;
-              else if (col.includes("URAIAN") || col.includes("KETERANGAN") || col.includes("TRANSAKSI")) colIdx.ket = i;
-              else if (col.includes("DEBIT") || col.includes("DEBET")) colIdx.deb = i;
-              else if (col.includes("KREDIT")) colIdx.kre = i;
-          });
-      }
-
-      const cleanData = [];
-      data.forEach((row, index) => {
-        if (index > headerRowIndex && row.length > 2) {
-           let tgl = row[colIdx.tgl]; 
-           let ket = row[colIdx.ket];
-           let deb = cleanCurrency(row[colIdx.deb]);
-           let kre = cleanCurrency(row[colIdx.kre]);
-           // Tambahkan ID unik untuk keperluan edit
-           if(tgl && (deb > 0 || kre > 0)) cleanData.push({ id: index, tgl, ket, deb, kre });
-        }
-      });
-      setFileData(cleanData);
-      setIsProcessing(false);
-      setActiveTab('result');
-    };
-    reader.readAsText(file); 
-  };
-
-  const identifyAccount = (desc) => {
-    if (!desc) return { akun: "TANPA KETERANGAN", kode: "0-000" };
-    const upperDesc = desc.toString().toUpperCase();
-    for (const m of mappings) {
-      if (upperDesc.includes(m.keyword.toUpperCase())) return { akun: m.akun, kode: m.kode };
-    }
-    return { akun: "PERIKSA MANUAL", kode: "CEK" };
-  };
-
-  const processJurnal = (data) => {
-    const masuk = [];
-    const keluar = [];
-    const bankCode = "I.1.2.1"; 
-    let manualCount = 0;
-
-    data.forEach((item) => {
-      const { akun, kode } = identifyAccount(item.ket);
-      if (kode === "CEK") manualCount++;
-
-      // Object jurnal dengan ID dari data asli agar konsisten
-      const jurnalItem = {
-        id: item.id,
-        tanggal: item.tgl,
-        uraian: item.ket,
-        // Kita simpan field dinamis (debit/kredit)
-        // Jika Kas Keluar: Debit = Akun Lawan, Kredit = Bank
-        // Jika Kas Masuk: Debit = Bank, Kredit = Akun Lawan
-        akun_lawan: akun,
-        kode_lawan: kode,
-        bank_akun: "Bank Mandiri Induk AKM",
-        bank_kode: bankCode,
-        jumlah: item.deb > 0 ? item.deb : item.kre,
-        tipe: item.deb > 0 ? 'keluar' : 'masuk',
-        bukti: item.deb > 0 
-          ? `BKK-${(keluar.length + 1).toString().padStart(4, '0')}`
-          : `BKM-${(masuk.length + 1).toString().padStart(4, '0')}`
-      };
-
-      if (item.deb > 0) keluar.push(jurnalItem);
-      else if (item.kre > 0) masuk.push(jurnalItem);
-    });
-
-    setUnidentifiedCount(manualCount);
-    setProcessedData({ masuk, keluar });
-  };
-
-  // --- FUNGSI EDIT LIVE (BARU) ---
-  const handleEditRow = (type, id, newKode) => {
-    setHasManualEdits(true); // Tandai sudah ada edit manual
-    const selectedAccount = MASTER_AKUN_SAK_EP.find(a => a.kode === newKode);
-    if (!selectedAccount) return;
-
-    setProcessedData(prev => {
-      const list = [...prev[type]];
-      const index = list.findIndex(item => item.id === id);
-      if (index !== -1) {
-        // Update Akun Lawan & Kode Lawan
-        list[index] = {
-          ...list[index],
-          akun_lawan: selectedAccount.nama,
-          kode_lawan: selectedAccount.kode
-        };
-      }
-      
-      // Recalculate unidentified count
-      const allItems = [...prev.masuk, ...prev.keluar];
-      // Karena kita edit 'list' (salah satu array), kita perlu gabungkan state baru + state lama
-      const updatedAll = type === 'masuk' 
-         ? [...list, ...prev.keluar]
-         : [...prev.masuk, ...list];
-         
-      const newCount = updatedAll.filter(i => i.kode_lawan === 'CEK').length;
-      setUnidentifiedCount(newCount);
-
-      return {
-        ...prev,
-        [type]: list
-      };
-    });
-  };
-
-  const downloadCSV = (data, filename) => {
-    if (data.length === 0) return alert("Data kosong!");
-    // Format untuk CSV Laporan (Sesuaikan kolom yang diinginkan user)
-    // Format: Tanggal, Bukti, Uraian, Akun Debit, Kode Debit, Akun Kredit, Kode Kredit, Jumlah
-    
-    // Header
-    const headers = "TANGGAL,NO BUKTI,URAIAN,AKUN DEBIT,KODE DEBIT,AKUN KREDIT,KODE KREDIT,JUMLAH";
-    
-    const rows = data.map(item => {
-       const isKeluar = item.tipe === 'keluar';
-       // Jika Keluar: Debit = Lawan, Kredit = Bank
-       // Jika Masuk: Debit = Bank, Kredit = Lawan
-       
-       const akunDeb = isKeluar ? item.akun_lawan : item.bank_akun;
-       const kodeDeb = isKeluar ? item.kode_lawan : item.bank_kode;
-       const akunKre = isKeluar ? item.bank_akun : item.akun_lawan;
-       const kodeKre = isKeluar ? item.bank_kode : item.kode_lawan;
-       
-       return [
-         item.tanggal,
-         item.bukti,
-         `"${item.uraian.replace(/"/g, '""')}"`,
-         akunDeb,
-         kodeDeb,
-         akunKre,
-         kodeKre,
-         item.jumlah
-       ].join(",");
-    }).join("\n");
-    
-    const link = document.createElement("a");
-    link.setAttribute("href", encodeURI("data:text/csv;charset=utf-8," + headers + "\n" + rows));
-    link.setAttribute("download", filename);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  return (
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-800 p-6">
-      <div className="max-w-7xl mx-auto bg-white shadow-xl rounded-xl overflow-hidden">
+    <div class="max-w-7xl mx-auto bg-white shadow-2xl rounded-2xl overflow-hidden border border-slate-200">
         
-        {/* HEADER */}
-        <div className="bg-blue-800 p-6 text-white flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-bold flex items-center gap-2">
-              <FileText className="w-8 h-8" /> Smart Jurnal Generator
-            </h1>
-            <p className="text-blue-100 text-sm mt-1">Otomatisasi Jurnal SAK EP + Live Editor</p>
-          </div>
-          <div className="text-right text-xs text-blue-200">Versi 6.0 (Live Edit)</div>
+        <!-- HEADER -->
+        <div class="bg-gradient-to-r from-blue-900 to-blue-700 p-6 text-white flex justify-between items-center shadow-lg">
+            <div>
+                <h1 class="text-2xl md:text-3xl font-bold flex items-center gap-3">
+                    <i data-lucide="brain-circuit" class="w-8 h-8 md:w-10 md:h-10 text-blue-200"></i> 
+                    Smart Jurnal Generator
+                </h1>
+                <p class="text-blue-100 text-sm mt-1 opacity-90">Otomatisasi Jurnal SAK EP dengan <strong>Memori Permanen</strong></p>
+            </div>
+            <div class="text-right hidden md:block">
+                <div class="text-xs text-blue-200 bg-blue-800/50 px-3 py-1 rounded-full border border-blue-500/30">
+                    Versi 8.0 (Persistent Brain)
+                </div>
+            </div>
         </div>
 
-        {/* NAVIGATION */}
-        <div className="flex border-b border-slate-200 bg-white sticky top-0 z-20">
-          {['upload', 'mapping', 'result'].map((tab, idx) => (
-            <button 
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`flex-1 py-4 font-semibold text-sm capitalize transition ${activeTab === tab ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50' : 'text-slate-500 hover:bg-slate-50'}`}
-            >
-              {idx + 1}. {tab === 'upload' ? 'Upload Data' : tab === 'mapping' ? 'Kamus Akun' : 'Hasil & Edit'}
-              {tab === 'result' && unidentifiedCount > 0 && <span className="ml-2 bg-red-500 text-white px-2 py-0.5 rounded-full text-[10px]">{unidentifiedCount}</span>}
+        <!-- NAVIGATION -->
+        <div class="flex border-b border-slate-200 bg-white sticky top-0 z-30 shadow-sm">
+            <button onclick="switchTab('upload')" id="tab-upload" class="tab-btn flex-1 py-4 font-bold text-sm uppercase tracking-wide transition border-b-4 focus:outline-none">
+                1. Upload Data
             </button>
-          ))}
+            <button onclick="switchTab('mapping')" id="tab-mapping" class="tab-btn flex-1 py-4 font-bold text-sm uppercase tracking-wide transition border-b-4 focus:outline-none text-slate-400 border-transparent hover:bg-slate-50">
+                2. Kamus (Otak)
+            </button>
+            <button onclick="switchTab('result')" id="tab-result" class="tab-btn flex-1 py-4 font-bold text-sm uppercase tracking-wide transition border-b-4 focus:outline-none text-slate-400 border-transparent hover:bg-slate-50 relative">
+                3. Hasil & Edit 
+                <span id="badge-manual" class="hidden absolute top-3 right-3 md:right-10 bg-red-500 text-white px-2 py-0.5 rounded-full text-[10px] shadow-sm animate-pulse">0</span>
+            </button>
         </div>
 
-        {/* CONTENT */}
-        <div className="p-6 min-h-[500px]">
-          
-          {/* TAB 1: UPLOAD */}
-          {activeTab === 'upload' && (
-            <div className="flex flex-col items-center justify-center h-full space-y-6 py-10">
-              <div className="w-full max-w-lg border-2 border-dashed border-blue-300 rounded-xl p-12 bg-blue-50 text-center hover:bg-blue-100 transition cursor-pointer relative group">
-                <input type="file" accept=".csv" onChange={handleFileUpload} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
-                <Upload className="w-16 h-16 text-blue-500 mx-auto mb-4 group-hover:scale-110 transition" />
-                <h3 className="text-xl font-bold text-blue-800">Upload File CSV</h3>
-                <p className="text-slate-500 mt-2">Rekening Koran Bank Mandiri/Lainnya</p>
-              </div>
-              {isProcessing && <div className="text-blue-600 animate-pulse font-semibold">Sedang membaca data...</div>}
-            </div>
-          )}
+        <!-- CONTENT CONTAINER -->
+        <div class="p-6 min-h-[600px] bg-slate-50/50">
 
-          {/* TAB 2: MAPPING */}
-          {activeTab === 'mapping' && (
-            <div>
-              <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg mb-6 flex gap-4 items-center">
-                 <div className="bg-blue-100 p-2 rounded-full"><Plus className="w-6 h-6 text-blue-600"/></div>
-                 <div className="flex-1">
-                    <h4 className="font-bold text-blue-900">Tambah Kata Kunci Baru</h4>
-                    <p className="text-sm text-blue-700 mb-2">Aturan Global: Kata kunci yang ditambah di sini akan berlaku untuk SEMUA transaksi.</p>
+            <!-- TAB 1: UPLOAD -->
+            <div id="view-upload" class="view-section fade-in">
+                <div class="flex flex-col items-center justify-center h-full space-y-8 py-10">
                     
-                    <div className="flex gap-2 items-center">
-                      <input 
-                        placeholder="Kata Kunci (Mis: TOKO ADIL)" 
-                        value={newMap.keyword}
-                        onChange={e => setNewMap({...newMap, keyword: e.target.value})}
-                        className="input input-sm border border-slate-300 rounded px-3 py-2 w-1/3 uppercase font-semibold"
-                      />
-                      <div className="relative flex-1">
-                        <select 
-                          onChange={handleAccountSelect}
-                          className="w-full border border-slate-300 rounded px-3 py-2 appearance-none bg-white font-medium text-slate-700 cursor-pointer hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          value={newMap.kode || ""}
-                        >
-                          <option value="" disabled>-- Pilih Akun SAK EP --</option>
-                          {['ASET', 'KEWAJIBAN', 'PENDAPATAN', 'BEBAN'].map(cat => (
-                            <optgroup key={cat} label={cat}>
-                              {MASTER_AKUN_SAK_EP.filter(a => a.kategori === cat).map(acc => (
-                                <option key={acc.kode} value={acc.kode}>{acc.nama} ({acc.kode})</option>
-                              ))}
-                            </optgroup>
-                          ))}
-                        </select>
-                        <div className="absolute right-3 top-3 pointer-events-none text-slate-400">▼</div>
-                      </div>
-                      <button onClick={addMapping} className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded font-bold shadow-sm transition">SIMPAN</button>
+                    <!-- Dropzone -->
+                    <div class="w-full max-w-xl border-3 border-dashed border-blue-300 rounded-2xl p-12 bg-white text-center hover:bg-blue-50 hover:border-blue-500 transition-all cursor-pointer relative group shadow-sm hover:shadow-md">
+                        <input type="file" id="fileInput" accept=".csv" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
+                        <div class="mx-auto mb-6 w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 group-hover:scale-110 transition duration-300">
+                            <i data-lucide="upload-cloud" class="w-10 h-10"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-slate-700 mb-2">Upload CSV Rekening Koran</h3>
+                        <p class="text-slate-500 text-sm">Seret file ke sini atau klik untuk memilih.</p>
+                        <div class="mt-6 inline-block px-4 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded-full">
+                            Mendukung Format Bank Mandiri
+                        </div>
                     </div>
-                 </div>
-              </div>
 
-              <div className="border rounded-lg overflow-hidden shadow-sm">
-                <table className="w-full text-sm text-left">
-                  <thead className="bg-slate-100 text-slate-600 font-bold uppercase text-xs">
-                    <tr>
-                      <th className="p-3 w-1/3">Kata Kunci (Bank)</th>
-                      <th className="p-3 w-1/3">Akun SAK EP</th>
-                      <th className="p-3 w-1/6">Kode</th>
-                      <th className="p-3 text-center">Hapus</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {mappings.map((m) => (
-                      <tr key={m.id} className="hover:bg-slate-50 transition">
-                        <td className="p-3 font-mono font-bold text-blue-700">{m.keyword}</td>
-                        <td className="p-3 text-slate-700">{m.akun}</td>
-                        <td className="p-3 font-mono text-slate-500">{m.kode}</td>
-                        <td className="p-3 text-center">
-                          <button onClick={() => removeMapping(m.id)} className="text-slate-300 hover:text-red-500 transition"><Trash2 className="w-4 h-4 mx-auto" /></button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
+                    <!-- Info Box -->
+                    <div class="max-w-xl text-center space-y-2">
+                        <div id="loading-indicator" class="hidden flex items-center justify-center gap-2 text-blue-600 font-bold bg-white px-6 py-3 rounded-full shadow-md">
+                            <i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Membaca dan Menganalisis Data...
+                        </div>
+                        <p class="text-xs text-slate-400">Pastikan file Anda berformat .CSV (Comma Separated Values)</p>
+                    </div>
 
-          {/* TAB 3: RESULT & EDIT */}
-          {activeTab === 'result' && (
-            <div>
-              {fileData.length === 0 ? (
-                <div className="text-center py-20 text-slate-400 flex flex-col items-center">
-                  <Search className="w-12 h-12 mb-2 opacity-20" />
-                  <p>Belum ada data. Silakan upload file CSV di Tab 1.</p>
                 </div>
-              ) : (
-                <div className="space-y-6">
-                  {/* SUMMARY & TOOLS */}
-                  <div className="flex flex-wrap justify-between items-end gap-4 bg-slate-50 p-4 rounded-lg border border-slate-200">
-                     <div className="flex gap-4">
-                        <div className="text-center px-4 border-r border-slate-300">
-                           <div className="text-2xl font-bold text-slate-700">{processedData.masuk.length + processedData.keluar.length}</div>
-                           <div className="text-xs text-slate-500 uppercase tracking-wide">Total Transaksi</div>
-                        </div>
-                        <div className={`text-center px-4 ${unidentifiedCount > 0 ? 'text-red-600' : 'text-green-600'}`}>
-                           <div className="text-2xl font-bold">{unidentifiedCount}</div>
-                           <div className="text-xs uppercase tracking-wide">Perlu Cek Manual</div>
-                        </div>
-                     </div>
-                     
-                     <div className="flex gap-2">
-                        {/* FILTER BUTTON */}
-                        <button 
-                           onClick={() => setShowOnlyManual(!showOnlyManual)}
-                           className={`flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-sm border transition ${showOnlyManual ? 'bg-red-100 border-red-300 text-red-700' : 'bg-white border-slate-300 text-slate-600 hover:bg-slate-100'}`}
-                        >
-                           <Filter className="w-4 h-4" />
-                           {showOnlyManual ? 'Tampilkan Semua' : 'Fokus Cek Manual'}
+            </div>
+
+            <!-- TAB 2: MAPPING -->
+            <div id="view-mapping" class="view-section hidden fade-in">
+                
+                <!-- Stats & Actions -->
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                    <div>
+                        <h3 class="font-bold text-xl text-slate-800 flex items-center gap-2">
+                            <i data-lucide="database" class="w-5 h-5 text-blue-600"></i> Kamus Kecerdasan
+                        </h3>
+                        <p class="text-sm text-slate-500">Aturan ini tersimpan permanen di browser Anda.</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="downloadMappings()" class="text-xs flex items-center gap-2 px-3 py-2 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 text-slate-600 shadow-sm transition">
+                            <i data-lucide="download" class="w-3 h-3"></i> Backup Kamus
                         </button>
-                     </div>
-                  </div>
-
-                  {/* TABEL EDITOR */}
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    {['masuk', 'keluar'].map(type => {
-                      const dataList = processedData[type];
-                      const filteredList = showOnlyManual 
-                         ? dataList.filter(item => item.kode_lawan === 'CEK')
-                         : dataList;
-                      
-                      return (
-                        <div key={type} className={`border rounded-xl shadow-sm flex flex-col h-[600px] ${type === 'masuk' ? 'border-green-200' : 'border-orange-200'}`}>
-                          {/* Card Header */}
-                          <div className={`p-4 border-b flex justify-between items-center ${type === 'masuk' ? 'bg-green-50 border-green-200' : 'bg-orange-50 border-orange-200'}`}>
-                             <div>
-                                <h4 className={`font-bold uppercase flex items-center gap-2 ${type === 'masuk' ? 'text-green-800' : 'text-orange-800'}`}>
-                                   {type === 'masuk' ? <ArrowRight className="w-4 h-4 rotate-180"/> : <ArrowRight className="w-4 h-4"/>}
-                                   Kas {type} ({filteredList.length})
-                                </h4>
-                             </div>
-                             <button 
-                                onClick={() => downloadCSV(dataList, `Jurnal_Kas_${type}.csv`)}
-                                className={`text-xs px-3 py-1.5 rounded text-white font-bold flex items-center gap-1 shadow-sm ${type === 'masuk' ? 'bg-green-600 hover:bg-green-700' : 'bg-orange-600 hover:bg-orange-700'}`}
-                             >
-                               <Download className="w-3 h-3" /> CSV
-                             </button>
-                          </div>
-
-                          {/* Table Area */}
-                          <div className="flex-1 overflow-auto bg-white relative">
-                             {filteredList.length === 0 ? (
-                                <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-400">
-                                   <CheckCircle className="w-12 h-12 mb-2 opacity-20" />
-                                   <p className="text-sm">Tidak ada data untuk ditampilkan</p>
-                                </div>
-                             ) : (
-                                <table className="w-full text-xs text-left">
-                                  <thead className="bg-slate-100 sticky top-0 z-10 font-bold text-slate-600 shadow-sm">
-                                    <tr>
-                                      <th className="p-2 w-[80px]">Tanggal</th>
-                                      <th className="p-2 w-[180px]">Uraian Bank</th>
-                                      <th className="p-2">Akun Lawan (Edit Disini)</th>
-                                      <th className="p-2 w-[90px] text-right">Jumlah</th>
-                                    </tr>
-                                  </thead>
-                                  <tbody className="divide-y divide-slate-100">
-                                    {filteredList.map((row) => {
-                                      const isManual = row.kode_lawan === "CEK";
-                                      return (
-                                        <tr key={row.id} className={isManual ? 'bg-red-50' : 'hover:bg-slate-50'}>
-                                          <td className="p-2 align-top text-slate-500">{row.tanggal}</td>
-                                          <td className="p-2 align-top text-slate-700" title={row.uraian}>
-                                             <div className="line-clamp-2">{row.uraian}</div>
-                                          </td>
-                                          <td className="p-2 align-top">
-                                             {/* LIVE EDITOR DROPDOWN */}
-                                             <div className="relative">
-                                                <select
-                                                   className={`w-full border rounded px-2 py-1 appearance-none cursor-pointer focus:outline-none focus:ring-1 focus:ring-blue-500 transition
-                                                      ${isManual ? 'border-red-300 bg-red-100 text-red-800 font-bold' : 'border-slate-200 bg-white text-slate-700'}
-                                                   `}
-                                                   value={isManual ? "" : row.kode_lawan}
-                                                   onChange={(e) => handleEditRow(type, row.id, e.target.value)}
-                                                >
-                                                   <option value="" disabled>-- Pilih Akun --</option>
-                                                   {['ASET', 'KEWAJIBAN', 'PENDAPATAN', 'BEBAN'].map(cat => (
-                                                      <optgroup key={cat} label={cat}>
-                                                         {MASTER_AKUN_SAK_EP.filter(a => a.kategori === cat).map(acc => (
-                                                            <option key={acc.kode} value={acc.kode}>{acc.nama}</option>
-                                                         ))}
-                                                      </optgroup>
-                                                   ))}
-                                                </select>
-                                                {/* Code Display Badge */}
-                                                {!isManual && (
-                                                   <div className="text-[10px] text-slate-400 mt-1 font-mono pl-1">
-                                                      Kode: {row.kode_lawan}
-                                                   </div>
-                                                )}
-                                             </div>
-                                          </td>
-                                          <td className="p-2 align-top text-right font-mono font-medium">
-                                             {row.jumlah.toLocaleString('id-ID')}
-                                          </td>
-                                        </tr>
-                                      );
-                                    })}
-                                  </tbody>
-                                </table>
-                             )}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-
+                        <button onclick="document.getElementById('importInput').click()" class="text-xs flex items-center gap-2 px-3 py-2 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 text-slate-600 shadow-sm transition">
+                            <i data-lucide="upload" class="w-3 h-3"></i> Restore Kamus
+                        </button>
+                        <input type="file" id="importInput" accept=".json" class="hidden" onchange="importMappings(this)" />
+                        
+                        <button onclick="resetMappings()" class="text-xs flex items-center gap-2 px-3 py-2 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 text-red-600 shadow-sm transition" title="Reset ke Default">
+                            <i data-lucide="refresh-ccw" class="w-3 h-3"></i> Reset
+                        </button>
+                    </div>
                 </div>
-              )}
+
+                <!-- Form Tambah -->
+                <div class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 p-6 rounded-xl mb-8 shadow-sm relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-blue-200/20 rounded-full -mr-10 -mt-10 blur-2xl pointer-events-none"></div>
+                    
+                    <div class="flex gap-4 items-start md:items-center">
+                        <div class="bg-blue-600 p-3 rounded-lg shadow-lg shadow-blue-600/20 hidden md:block">
+                            <i data-lucide="plus" class="w-6 h-6 text-white"></i>
+                        </div>
+                        <div class="flex-1 w-full space-y-4">
+                            <div>
+                                <h4 class="font-bold text-blue-900 text-lg">Tambah Pengetahuan Baru</h4>
+                                <p class="text-sm text-blue-700/80">Masukkan kata kunci unik dari transaksi bank agar dikenali otomatis selamanya.</p>
+                            </div>
+                            
+                            <div class="flex flex-col md:flex-row gap-3">
+                                <div class="flex-1">
+                                    <input id="map-keyword" placeholder="Contoh: TOKO ADIL" class="w-full input border-2 border-slate-200 focus:border-blue-500 rounded-lg px-4 py-2.5 uppercase font-bold text-slate-700 transition placeholder:font-normal" />
+                                </div>
+                                <div class="flex-1 relative">
+                                    <select id="map-select" class="w-full border-2 border-slate-200 focus:border-blue-500 rounded-lg px-4 py-2.5 appearance-none bg-white font-medium text-slate-700 cursor-pointer transition">
+                                        <option value="" disabled selected>-- Pilih Akun SAK EP --</option>
+                                        <!-- Populated by JS -->
+                                    </select>
+                                    <div class="absolute right-4 top-3.5 pointer-events-none text-slate-400">
+                                        <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                                    </div>
+                                </div>
+                                <button onclick="addMapping()" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-2.5 rounded-lg font-bold shadow-lg shadow-blue-600/20 transition transform active:scale-95 flex items-center justify-center gap-2">
+                                    <i data-lucide="save" class="w-4 h-4"></i> SIMPAN
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Table Mapping -->
+                <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                    <div class="bg-slate-50 px-6 py-3 border-b border-slate-200 flex justify-between items-center">
+                        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Tabel Aturan (<span id="count-mappings">0</span>)</span>
+                        <input type="text" id="search-mapping" onkeyup="filterMappings()" placeholder="Cari aturan..." class="text-xs border rounded px-2 py-1 focus:outline-blue-500">
+                    </div>
+                    <div class="max-h-[500px] overflow-y-auto custom-scrollbar">
+                        <table class="w-full text-sm text-left">
+                            <thead class="bg-slate-100 text-slate-600 font-bold text-xs sticky top-0 shadow-sm z-10">
+                                <tr>
+                                    <th class="p-4 w-1/3">Kata Kunci (Bank)</th>
+                                    <th class="p-4 w-1/3">Akun SAK EP</th>
+                                    <th class="p-4 w-1/6">Kode</th>
+                                    <th class="p-4 text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-mappings-body" class="divide-y divide-slate-100">
+                                <!-- Rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
-          )}
+
+            <!-- TAB 3: RESULT -->
+            <div id="view-result" class="view-section hidden fade-in">
+                <!-- Empty State -->
+                <div id="result-empty" class="text-center py-20 text-slate-400 flex flex-col items-center">
+                    <div class="w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mb-4">
+                        <i data-lucide="search-x" class="w-10 h-10 opacity-30"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-600">Belum Ada Data</h3>
+                    <p>Silakan upload file CSV di Tab 1 untuk memulai.</p>
+                </div>
+
+                <!-- Data Content -->
+                <div id="result-content" class="hidden space-y-6">
+                    
+                    <!-- Dashboard Cards -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                            <div class="text-xs text-slate-500 uppercase font-bold mb-1">Total Transaksi</div>
+                            <div id="total-transaksi" class="text-3xl font-bold text-slate-800">0</div>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                            <div class="text-xs text-slate-500 uppercase font-bold mb-1">Perlu Cek Manual</div>
+                            <div id="total-manual" class="text-3xl font-bold text-slate-800">0</div>
+                        </div>
+                        <div class="bg-green-50 p-4 rounded-xl shadow-sm border border-green-200 cursor-pointer hover:bg-green-100 transition" onclick="document.getElementById('masuk-section').scrollIntoView({behavior: 'smooth'})">
+                            <div class="text-xs text-green-700 uppercase font-bold mb-1">Kas Masuk</div>
+                            <div id="count-masuk" class="text-2xl font-bold text-green-800">0</div>
+                        </div>
+                        <div class="bg-orange-50 p-4 rounded-xl shadow-sm border border-orange-200 cursor-pointer hover:bg-orange-100 transition" onclick="document.getElementById('keluar-section').scrollIntoView({behavior: 'smooth'})">
+                            <div class="text-xs text-orange-700 uppercase font-bold mb-1">Kas Keluar</div>
+                            <div id="count-keluar" class="text-2xl font-bold text-orange-800">0</div>
+                        </div>
+                    </div>
+
+                    <!-- Toolbar -->
+                    <div class="flex justify-between items-center bg-white p-3 rounded-lg border border-slate-200 shadow-sm sticky top-20 z-20">
+                        <div class="flex items-center gap-2">
+                             <span class="text-sm font-bold text-slate-600 px-2">Filter:</span>
+                             <button onclick="toggleFilter()" id="btn-filter" class="flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-sm border transition bg-slate-50 text-slate-600 border-slate-300 hover:bg-slate-100">
+                                <i data-lucide="filter" class="w-4 h-4"></i>
+                                <span id="btn-filter-text">Semua Data</span>
+                            </button>
+                        </div>
+                        <div class="text-xs text-slate-400 italic hidden md:block">
+                            <i data-lucide="info" class="w-3 h-3 inline mr-1"></i>
+                            Edit dropdown di bawah untuk memperbaiki data + menambah kamus
+                        </div>
+                    </div>
+
+                    <!-- Grid Tables -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        
+                        <!-- Tabel Masuk -->
+                        <div id="masuk-section" class="border rounded-xl shadow-sm flex flex-col h-[700px] border-green-200 bg-white">
+                            <div class="p-4 border-b flex justify-between items-center bg-green-50 border-green-200 rounded-t-xl">
+                                <h4 class="font-bold uppercase flex items-center gap-2 text-green-800">
+                                    <div class="p-1.5 bg-green-200 rounded-md"><i data-lucide="arrow-down-left" class="w-4 h-4"></i></div>
+                                    Jurnal Kas Masuk
+                                </h4>
+                                <button onclick="downloadCSV('masuk')" class="text-xs px-4 py-2 rounded-lg text-white font-bold flex items-center gap-2 shadow-md bg-green-600 hover:bg-green-700 transition transform active:scale-95">
+                                    <i data-lucide="download" class="w-4 h-4"></i> Unduh CSV
+                                </button>
+                            </div>
+                            <div class="flex-1 overflow-auto relative custom-scrollbar">
+                                <table class="w-full text-xs text-left">
+                                    <thead class="bg-slate-100 sticky top-0 z-10 font-bold text-slate-600 shadow-sm">
+                                        <tr>
+                                            <th class="p-3 w-[90px]">Tanggal</th>
+                                            <th class="p-3">Uraian Bank</th>
+                                            <th class="p-3 w-[200px]">Akun Lawan (Edit)</th>
+                                            <th class="p-3 w-[100px] text-right">Jumlah</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="table-masuk-body" class="divide-y divide-slate-100"></tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Tabel Keluar -->
+                        <div id="keluar-section" class="border rounded-xl shadow-sm flex flex-col h-[700px] border-orange-200 bg-white">
+                            <div class="p-4 border-b flex justify-between items-center bg-orange-50 border-orange-200 rounded-t-xl">
+                                <h4 class="font-bold uppercase flex items-center gap-2 text-orange-800">
+                                    <div class="p-1.5 bg-orange-200 rounded-md"><i data-lucide="arrow-up-right" class="w-4 h-4"></i></div>
+                                    Jurnal Kas Keluar
+                                </h4>
+                                <button onclick="downloadCSV('keluar')" class="text-xs px-4 py-2 rounded-lg text-white font-bold flex items-center gap-2 shadow-md bg-orange-600 hover:bg-orange-700 transition transform active:scale-95">
+                                    <i data-lucide="download" class="w-4 h-4"></i> Unduh CSV
+                                </button>
+                            </div>
+                            <div class="flex-1 overflow-auto relative custom-scrollbar">
+                                <table class="w-full text-xs text-left">
+                                    <thead class="bg-slate-100 sticky top-0 z-10 font-bold text-slate-600 shadow-sm">
+                                        <tr>
+                                            <th class="p-3 w-[90px]">Tanggal</th>
+                                            <th class="p-3">Uraian Bank</th>
+                                            <th class="p-3 w-[200px]">Akun Lawan (Edit)</th>
+                                            <th class="p-3 w-[100px] text-right">Jumlah</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="table-keluar-body" class="divide-y divide-slate-100"></tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
 
         </div>
-      </div>
     </div>
-  );
-}
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // --- 1. DATABASE MASTER SAK EP ---
+        const MASTER_AKUN_SAK_EP = [
+            { kode: 'I.1.1.1', nama: 'Kas Kecil AKM', kategori: 'ASET' },
+            { kode: 'I.1.2.1', nama: 'Bank Mandiri Induk AKM', kategori: 'ASET' },
+            { kode: 'I.3.1.1', nama: 'Piutang Simpan Pinjam Anggota', kategori: 'ASET' },
+            { kode: 'I.3.1.2', nama: 'Piutang Voucer Belanja Anggota', kategori: 'ASET' },
+            { kode: 'I.3.1.3', nama: 'Piutang Adamart Anggota', kategori: 'ASET' },
+            { kode: 'I.3.1.4', nama: 'Piutang Tiket Anggota', kategori: 'ASET' },
+            { kode: 'II.1.1', nama: 'Simpanan Sukarela', kategori: 'KEWAJIBAN' },
+            { kode: 'II.2.1', nama: 'Utang Payboss / Titipan', kategori: 'KEWAJIBAN' },
+            { kode: 'II.7', nama: 'Liabilitas Lainnya', kategori: 'KEWAJIBAN' },
+            { kode: 'IV.1.1', nama: 'Pendapatan Adamart Anggota', kategori: 'PENDAPATAN' },
+            { kode: 'IV.1.2', nama: 'Pendapatan Kredit Uang Anggota', kategori: 'PENDAPATAN' },
+            { kode: 'IV.1.6', nama: 'Pendapatan Administrasi Bank', kategori: 'PENDAPATAN' },
+            { kode: 'IV.2.13', nama: 'Pendapatan Bunga Bank', kategori: 'PENDAPATAN' },
+            { kode: 'IV.1.3', nama: 'Pendapatan Tiket Anggota', kategori: 'PENDAPATAN' },
+            { kode: 'V.3.1', nama: 'Beban Operasional', kategori: 'BEBAN' },
+            { kode: 'V.3.2', nama: 'Beban ATK', kategori: 'BEBAN' },
+            { kode: 'V.3.4', nama: 'Biaya BBM', kategori: 'BEBAN' },
+            { kode: 'V.3.7', nama: 'Beban Listrik', kategori: 'BEBAN' },
+            { kode: 'V.3.9', nama: 'Beban Telpon dan Internet', kategori: 'BEBAN' },
+            { kode: 'V.3.11', nama: 'Biaya Promosi', kategori: 'BEBAN' },
+            { kode: 'V.3.13', nama: 'Biaya Perbaikan & Pemeliharaan Kendaraan', kategori: 'BEBAN' },
+            { kode: 'V.3.17', nama: 'Biaya Administrasi Bank', kategori: 'BEBAN' },
+            { kode: 'V.3.18', nama: 'Perjalanan Dinas', kategori: 'BEBAN' },
+            { kode: 'V.3.20', nama: 'Beban Gaji Karyawan dan THR', kategori: 'BEBAN' },
+            { kode: 'V.3.22', nama: 'Beban BPJS', kategori: 'BEBAN' },
+            { kode: 'V.4.1', nama: 'Beban Honor Pengurus dan Pengawas', kategori: 'BEBAN' }
+        ];
+
+        // Default Mappings (Initial Seed)
+        const DEFAULT_MAPPINGS = [
+            { id: 1, keyword: 'YULIANT', akun: 'Piutang Simpan Pinjam Anggota', kode: 'I.3.1.1' },
+            { id: 2, keyword: 'ZAINAL', akun: 'Piutang Simpan Pinjam Anggota', kode: 'I.3.1.1' },
+            { id: 3, keyword: 'TARIK TUNAI', akun: 'Kas Kecil AKM', kode: 'I.1.1.1' },
+            { id: 4, keyword: 'OPRASIONAL', akun: 'Beban Operasional', kode: 'V.3.1' },
+            { id: 5, keyword: 'ADM', akun: 'Biaya Administrasi Bank', kode: 'V.3.17' },
+            { id: 6, keyword: 'BIAYA', akun: 'Biaya Administrasi Bank', kode: 'V.3.17' },
+            { id: 7, keyword: 'BUNGA', akun: 'Pendapatan Bunga Bank', kode: 'IV.2.13' },
+            { id: 8, keyword: 'PAJAK', akun: 'Biaya Administrasi Bank', kode: 'V.3.17' },
+            { id: 9, keyword: 'GAJI', akun: 'Beban Gaji Karyawan dan THR', kode: 'V.3.20' },
+            { id: 10, keyword: 'HONOR', akun: 'Beban Honor Pengurus dan Pengawas', kode: 'V.4.1' },
+            { id: 11, keyword: 'PAYBOSS', akun: 'Utang Payboss / Titipan', kode: 'II.2.1' },
+            { id: 12, keyword: 'LISTRIK', akun: 'Beban Listrik', kode: 'V.3.7' },
+            { id: 13, keyword: 'ATK', akun: 'Beban ATK', kode: 'V.3.2' },
+            { id: 14, keyword: 'BBM', akun: 'Biaya BBM', kode: 'V.3.4' }
+        ];
+
+        // --- 2. STATE MANAGEMENT & LOCAL STORAGE ---
+        let mappings = [];
+        let fileData = [];
+        let processedData = { masuk: [], keluar: [] };
+        let showOnlyManual = false;
+        let hasManualEdits = false;
+        let activeTab = 'upload';
+
+        // Load from LocalStorage
+        function loadMappings() {
+            const stored = localStorage.getItem('smart_jurnal_mappings');
+            if (stored) {
+                mappings = JSON.parse(stored);
+            } else {
+                mappings = [...DEFAULT_MAPPINGS];
+                saveMappings(); // Save defaults
+            }
+        }
+
+        // Save to LocalStorage
+        function saveMappings() {
+            localStorage.setItem('smart_jurnal_mappings', JSON.stringify(mappings));
+            renderMappings();
+            // Show toast if saving manually
+        }
+
+        function resetMappings() {
+            if(confirm('Reset kamus ke pengaturan awal? Semua kata kunci buatan Anda akan dihapus.')) {
+                mappings = [...DEFAULT_MAPPINGS];
+                saveMappings();
+                if(fileData.length > 0) processJurnal();
+            }
+        }
+
+        // --- 3. INIT ---
+        document.addEventListener('DOMContentLoaded', () => {
+            loadMappings();
+            populateDropdowns();
+            renderMappings();
+            lucide.createIcons();
+            
+            // File Upload Listener
+            document.getElementById('fileInput').addEventListener('change', handleFileUpload);
+
+            // Tab Default Styling
+            switchTab('upload');
+        });
+
+        // --- 4. NAVIGATION LOGIC ---
+        function switchTab(tabName) {
+            activeTab = tabName;
+            
+            // Buttons UI
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('text-blue-600', 'border-blue-600');
+                btn.classList.add('text-slate-400', 'border-transparent');
+            });
+            const activeBtn = document.getElementById(`tab-${tabName}`);
+            activeBtn.classList.remove('text-slate-400', 'border-transparent');
+            activeBtn.classList.add('text-blue-600', 'border-blue-600');
+
+            // View Sections
+            document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`view-${tabName}`).classList.remove('hidden');
+
+            if(tabName === 'result') renderResultsTable();
+        }
+
+        // --- 5. MAPPING LOGIC ---
+        function populateDropdowns() {
+            const select = document.getElementById('map-select');
+            const categories = ['ASET', 'KEWAJIBAN', 'PENDAPATAN', 'BEBAN'];
+            
+            let html = '<option value="" disabled selected>-- Pilih Akun SAK EP --</option>';
+            categories.forEach(cat => {
+                const items = MASTER_AKUN_SAK_EP.filter(x => x.kategori === cat);
+                if (items.length > 0) {
+                    html += `<optgroup label="${cat}">`;
+                    items.forEach(item => {
+                        html += `<option value="${item.kode}">${item.nama} (${item.kode})</option>`;
+                    });
+                    html += `</optgroup>`;
+                }
+            });
+            select.innerHTML = html;
+        }
+
+        function renderMappings() {
+            const tbody = document.getElementById('table-mappings-body');
+            const filter = document.getElementById('search-mapping').value.toUpperCase();
+            document.getElementById('count-mappings').innerText = mappings.length;
+            
+            // Sort by keyword alphabetical
+            const sortedMappings = [...mappings].sort((a,b) => a.keyword.localeCompare(b.keyword));
+            
+            const filtered = sortedMappings.filter(m => m.keyword.includes(filter) || m.akun.toUpperCase().includes(filter));
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-slate-400 italic">Tidak ada aturan yang cocok.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(m => `
+                <tr class="hover:bg-slate-50 transition border-b group">
+                    <td class="p-4 font-mono font-bold text-blue-700">${m.keyword}</td>
+                    <td class="p-4 text-slate-700 font-medium">${m.akun}</td>
+                    <td class="p-4 font-mono text-slate-500 text-xs bg-slate-50 rounded">${m.kode}</td>
+                    <td class="p-4 text-center">
+                        <button onclick="removeMapping(${m.id})" class="text-slate-300 hover:text-red-500 transition p-2 rounded-full hover:bg-red-50 group-hover:text-slate-400">
+                            <i data-lucide="trash-2" class="w-4 h-4 mx-auto"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+            
+            lucide.createIcons();
+        }
+
+        function filterMappings() {
+            renderMappings();
+        }
+
+        function addMapping() {
+            const keywordInput = document.getElementById('map-keyword');
+            const select = document.getElementById('map-select');
+            
+            const keyword = keywordInput.value.trim();
+            const selectedKode = select.value;
+
+            if (!keyword || !selectedKode) return Swal.fire('Ops!', 'Mohon isi kata kunci dan pilih akun.', 'warning');
+
+            // Check duplicate
+            if(mappings.some(m => m.keyword === keyword.toUpperCase())) {
+                return Swal.fire('Duplikat', 'Kata kunci ini sudah ada di kamus.', 'error');
+            }
+
+            const accInfo = MASTER_AKUN_SAK_EP.find(x => x.kode === selectedKode);
+            
+            mappings.push({
+                id: Date.now(),
+                keyword: keyword.toUpperCase(),
+                akun: accInfo.nama,
+                kode: accInfo.kode
+            });
+
+            keywordInput.value = '';
+            select.value = '';
+            
+            saveMappings(); // Save to LocalStorage
+            
+            // Re-process current file
+            hasManualEdits = false;
+            if(fileData.length > 0) {
+                processJurnal();
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Tersimpan!',
+                    text: 'Kamus diperbarui & data dihitung ulang.',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+            } else {
+                 Swal.fire({
+                    icon: 'success',
+                    title: 'Tersimpan!',
+                    text: 'Aturan baru ditambahkan ke memori.',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+            }
+        }
+
+        function removeMapping(id) {
+            Swal.fire({
+                title: 'Hapus aturan?',
+                text: "Aturan ini akan hilang selamanya.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                confirmButtonText: 'Ya, hapus!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    mappings = mappings.filter(m => m.id !== id);
+                    saveMappings();
+                    hasManualEdits = false;
+                    if(fileData.length > 0) processJurnal();
+                }
+            })
+        }
+
+        // --- 6. FILE PROCESSING LOGIC ---
+        function parseCSV(text) {
+            const lines = text.split('\n');
+            const result = [];
+            const splitLine = (line) => {
+                const regex = /,(?=(?:(?:[^"]*"){2})*[^"]*$)/; 
+                return line.split(regex).map(s => s.replace(/^"|"$/g, '').trim());
+            };
+            lines.forEach(line => {
+                if(!line.trim()) return;
+                try { result.push(splitLine(line)); } catch(e) {}
+            });
+            return result;
+        }
+
+        function cleanCurrency(str) {
+            if (typeof str === 'number') return str;
+            if (!str) return 0;
+            let clean = str.toString().replace(/[^0-9,.-]/g, '');
+            if (clean.includes(',') && !clean.includes('.')) {
+                clean = clean.replace(',', '.');
+            } else if (clean.includes('.') && clean.includes(',')) {
+                const lastComma = clean.lastIndexOf(',');
+                const lastDot = clean.lastIndexOf('.');
+                if (lastComma > lastDot) clean = clean.replace(/\./g, '').replace(',', '.');
+                else clean = clean.replace(/,/g, '');
+            }
+            return parseFloat(clean) || 0;
+        }
+
+        function handleFileUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            document.getElementById('loading-indicator').classList.remove('hidden');
+            
+            setTimeout(() => { // Delay for UI rendering
+                const reader = new FileReader();
+                reader.onload = (evt) => {
+                    const data = parseCSV(evt.target.result);
+                    
+                    let headerIdx = 0;
+                    data.forEach((row, i) => {
+                        const str = JSON.stringify(row).toUpperCase();
+                        if ((str.includes("TANGGAL") || str.includes("TGL")) && 
+                            (str.includes("URAIAN") || str.includes("KETERANGAN"))) {
+                            headerIdx = i;
+                        }
+                    });
+
+                    let col = { tgl: 1, ket: 2, deb: 4, kre: 5 };
+                    if (data[headerIdx]) {
+                        const h = data[headerIdx].map(s => s ? s.toUpperCase() : "");
+                        h.forEach((c, i) => {
+                            if (c.includes("TGL") || c.includes("TANGGAL")) col.tgl = i;
+                            else if (c.includes("URAIAN") || c.includes("KETERANGAN")) col.ket = i;
+                            else if (c.includes("DEBIT") || c.includes("DEBET")) col.deb = i;
+                            else if (c.includes("KREDIT")) col.kre = i;
+                        });
+                    }
+
+                    const cleanData = [];
+                    data.forEach((row, i) => {
+                        if (i > headerIdx && row.length > 2) {
+                            let tgl = row[col.tgl];
+                            let ket = row[col.ket];
+                            let deb = cleanCurrency(row[col.deb]);
+                            let kre = cleanCurrency(row[col.kre]);
+                            
+                            if (tgl && (deb > 0 || kre > 0)) {
+                                cleanData.push({ id: i, tgl, ket, deb, kre });
+                            }
+                        }
+                    });
+
+                    fileData = cleanData;
+                    hasManualEdits = false;
+                    processJurnal();
+                    document.getElementById('loading-indicator').classList.add('hidden');
+                    switchTab('result');
+                    Swal.fire('Berhasil!', `Data berhasil dimuat. ${fileData.length} transaksi.`, 'success');
+                };
+                reader.readAsText(file);
+            }, 500);
+        }
+
+        function identifyAccount(desc) {
+            if (!desc) return { akun: "TANPA KETERANGAN", kode: "0-000" };
+            const upper = desc.toUpperCase();
+            // Sort mappings by keyword length desc (longest match first) to improve accuracy
+            const sortedMappings = [...mappings].sort((a,b) => b.keyword.length - a.keyword.length);
+            
+            for (const m of sortedMappings) {
+                if (upper.includes(m.keyword)) return { akun: m.akun, kode: m.kode };
+            }
+            return { akun: "PERIKSA MANUAL", kode: "CEK" };
+        }
+
+        function processJurnal() {
+            if (hasManualEdits) return; 
+
+            const masuk = [];
+            const keluar = [];
+            const bankCode = "I.1.2.1"; 
+            
+            fileData.forEach(item => {
+                const { akun, kode } = identifyAccount(item.ket);
+                
+                const journalItem = {
+                    id: item.id,
+                    tanggal: item.tgl,
+                    uraian: item.ket,
+                    akun_lawan: akun,
+                    kode_lawan: kode,
+                    bank_akun: "Bank Mandiri Induk AKM",
+                    bank_kode: bankCode,
+                    jumlah: item.deb > 0 ? item.deb : item.kre,
+                    tipe: item.deb > 0 ? 'keluar' : 'masuk',
+                    bukti: item.deb > 0 
+                        ? `BKK-${(keluar.length + 1).toString().padStart(4, '0')}`
+                        : `BKM-${(masuk.length + 1).toString().padStart(4, '0')}`
+                };
+
+                if (item.deb > 0) keluar.push(journalItem);
+                else if (item.kre > 0) masuk.push(journalItem);
+            });
+
+            processedData = { masuk, keluar };
+            renderResultsTable();
+        }
+
+        // --- 7. RESULT TABLE & EDITING WITH "LEARN" FEATURE ---
+        function getDropdownHTML(selectedKode, type, id) {
+            const isManual = selectedKode === 'CEK';
+            let html = `
+            <div class="relative group-select">
+                <select onchange="handleEdit('${type}', ${id}, this.value)" 
+                class="w-full border rounded-lg px-3 py-2 appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-xs font-medium
+                ${isManual ? 'border-red-300 bg-red-50 text-red-800' : 'border-slate-200 bg-white text-slate-700'}">`;
+            
+            html += `<option value="" disabled>-- Pilih --</option>`;
+            if(isManual) html += `<option value="CEK" selected>⚠️ CEK MANUAL</option>`;
+
+            const categories = ['ASET', 'KEWAJIBAN', 'PENDAPATAN', 'BEBAN'];
+            categories.forEach(cat => {
+                html += `<optgroup label="${cat}">`;
+                MASTER_AKUN_SAK_EP.filter(x => x.kategori === cat).forEach(acc => {
+                    const isSel = acc.kode === selectedKode ? 'selected' : '';
+                    html += `<option value="${acc.kode}" ${isSel}>${acc.nama}</option>`;
+                });
+                html += `</optgroup>`;
+            });
+
+            html += `</select>`;
+            
+            // "Add to Dictionary" Button logic
+            if(!isManual) {
+                // If it was manual before, this button allows saving the rule
+                html += `
+                <button onclick="teachAI('${type}', ${id})" class="mt-1 text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded hover:bg-blue-200 w-full flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity" title="Simpan aturan ini ke Kamus agar otomatis kedepannya">
+                    <i data-lucide="brain-circuit" class="w-3 h-3"></i> Simpan ke Kamus
+                </button>
+                `;
+            }
+            
+            html += `</div>`;
+            return html;
+        }
+
+        function renderResultsTable() {
+            if (fileData.length === 0) {
+                document.getElementById('result-empty').classList.remove('hidden');
+                document.getElementById('result-content').classList.add('hidden');
+                return;
+            }
+
+            document.getElementById('result-empty').classList.add('hidden');
+            document.getElementById('result-content').classList.remove('hidden');
+
+            const allItems = [...processedData.masuk, ...processedData.keluar];
+            const manualCount = allItems.filter(x => x.kode_lawan === 'CEK').length;
+
+            document.getElementById('total-transaksi').innerText = allItems.length;
+            document.getElementById('total-manual').innerText = manualCount;
+            document.getElementById('count-masuk').innerText = processedData.masuk.length;
+            document.getElementById('count-keluar').innerText = processedData.keluar.length;
+
+            // Manual Badge
+            const badge = document.getElementById('badge-manual');
+            if (manualCount > 0) {
+                badge.innerText = manualCount;
+                badge.classList.remove('hidden');
+                document.getElementById('total-manual').parentElement.classList.add('bg-red-50', 'border-red-200');
+                document.getElementById('total-manual').classList.add('text-red-600');
+            } else {
+                badge.classList.add('hidden');
+                document.getElementById('total-manual').parentElement.classList.remove('bg-red-50', 'border-red-200');
+                document.getElementById('total-manual').classList.remove('text-red-600');
+            }
+
+            // Filter Logic
+            const btnFilter = document.getElementById('btn-filter');
+            const btnText = document.getElementById('btn-filter-text');
+            if (showOnlyManual) {
+                btnFilter.classList.add('bg-red-100', 'text-red-700', 'border-red-300');
+                btnFilter.classList.remove('bg-slate-50');
+                btnText.innerText = "Fokus Cek Manual";
+            } else {
+                btnFilter.classList.remove('bg-red-100', 'text-red-700', 'border-red-300');
+                btnFilter.classList.add('bg-slate-50');
+                btnText.innerText = "Semua Data";
+            }
+
+            renderSingleTable('masuk', document.getElementById('table-masuk-body'));
+            renderSingleTable('keluar', document.getElementById('table-keluar-body'));
+            
+            lucide.createIcons();
+        }
+
+        function renderSingleTable(type, tbody) {
+            const list = processedData[type];
+            let displayList = list;
+            
+            if (showOnlyManual) {
+                displayList = list.filter(item => item.kode_lawan === 'CEK');
+            }
+
+            if (displayList.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-slate-400">Tidak ada data ditampilkan.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = displayList.map(row => {
+                const isManual = row.kode_lawan === 'CEK';
+                return `
+                <tr class="${isManual ? 'bg-red-50/50' : 'hover:bg-slate-50'} border-b transition group">
+                    <td class="p-3 align-top text-slate-500 font-mono">${row.tanggal}</td>
+                    <td class="p-3 align-top text-slate-700">
+                        <div class="line-clamp-2" title="${row.uraian}">${row.uraian}</div>
+                        <div class="text-[10px] text-slate-400 mt-1">${row.bukti}</div>
+                    </td>
+                    <td class="p-3 align-top">
+                        ${getDropdownHTML(row.kode_lawan, type, row.id)}
+                    </td>
+                    <td class="p-3 align-top text-right font-mono font-medium text-slate-700">
+                        ${row.jumlah.toLocaleString('id-ID')}
+                    </td>
+                </tr>
+                `;
+            }).join('');
+        }
+
+        function toggleFilter() {
+            showOnlyManual = !showOnlyManual;
+            renderResultsTable();
+        }
+
+        function handleEdit(type, id, newKode) {
+            hasManualEdits = true;
+            const account = MASTER_AKUN_SAK_EP.find(x => x.kode === newKode);
+            
+            const index = processedData[type].findIndex(x => x.id === id);
+            if (index !== -1 && account) {
+                processedData[type][index].akun_lawan = account.nama;
+                processedData[type][index].kode_lawan = account.kode;
+            }
+            renderResultsTable();
+        }
+
+        // --- 8. TEACH AI FEATURE ---
+        async function teachAI(type, id) {
+            const item = processedData[type].find(x => x.id === id);
+            if(!item) return;
+
+            const { value: keyword } = await Swal.fire({
+                title: 'Ajarkan Logika Baru',
+                input: 'text',
+                inputLabel: `Masukkan KATA KUNCI unik dari uraian ini:`,
+                inputValue: item.uraian, // Default value full uraian, user should shorten it
+                inputPlaceholder: 'Contoh: TOKO BERKAH',
+                showCancelButton: true,
+                confirmButtonText: 'Simpan ke Kamus',
+                footer: 'Logika ini akan disimpan permanen untuk masa depan.'
+            });
+
+            if (keyword) {
+                // Add to mappings
+                const accInfo = MASTER_AKUN_SAK_EP.find(x => x.kode === item.kode_lawan);
+                mappings.push({
+                    id: Date.now(),
+                    keyword: keyword.toUpperCase(),
+                    akun: accInfo.nama,
+                    kode: accInfo.kode
+                });
+                saveMappings(); // Save persistent
+                
+                // Re-process everything to apply new rule to ALL similar items
+                hasManualEdits = false;
+                processJurnal();
+                
+                Swal.fire('Terima Kasih!', 'Saya sudah mempelajari aturan baru ini.', 'success');
+            }
+        }
+
+        // --- 9. UTILS ---
+        function downloadCSV(type) {
+            const list = processedData[type];
+            if (list.length === 0) return Swal.fire('Data Kosong', 'Tidak ada data untuk diunduh.', 'info');
+
+            const headers = ["TANGGAL", "NO BUKTI", "URAIAN", "AKUN DEBIT", "KODE DEBIT", "AKUN KREDIT", "KODE KREDIT", "JUMLAH"];
+            const csvRows = [headers.join(",")];
+
+            list.forEach(item => {
+                const isKeluar = type === 'keluar';
+                const akDeb = isKeluar ? item.akun_lawan : item.bank_akun;
+                const kdDeb = isKeluar ? item.kode_lawan : item.bank_kode;
+                const akKre = isKeluar ? item.bank_akun : item.akun_lawan;
+                const kdKre = isKeluar ? item.bank_kode : item.kode_lawan;
+
+                const row = [
+                    item.tanggal,
+                    item.bukti,
+                    `"${item.uraian.replace(/"/g, '""')}"`,
+                    akDeb, kdDeb, akKre, kdKre,
+                    item.jumlah
+                ];
+                csvRows.push(row.join(","));
+            });
+
+            const blob = new Blob([csvRows.join("\n")], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.setAttribute('hidden', '');
+            a.setAttribute('href', url);
+            a.setAttribute('download', `Jurnal_Kas_${type.toUpperCase()}.csv`);
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        // Backup & Restore
+        function downloadMappings() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(mappings));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href",     dataStr);
+            downloadAnchorNode.setAttribute("download", "kamus_smart_jurnal.json");
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        }
+
+        function importMappings(input) {
+            const file = input.files[0];
+            if(!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    if(Array.isArray(imported)) {
+                        mappings = imported;
+                        saveMappings();
+                        Swal.fire('Sukses', 'Kamus berhasil dipulihkan.', 'success');
+                        if(fileData.length > 0) processJurnal();
+                    }
+                } catch(err) {
+                    Swal.fire('Error', 'File JSON tidak valid.', 'error');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+    </script>
+</body>
+</html>
