@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Jurnal Generator - SAK EP (Persistent)</title>
+    <title>Smart Jurnal Generator - SAK EP (Full Database)</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
@@ -24,17 +24,17 @@
     <div class="max-w-7xl mx-auto bg-white shadow-2xl rounded-2xl overflow-hidden border border-slate-200">
         
         <!-- HEADER -->
-        <div class="bg-gradient-to-r from-blue-900 to-blue-700 p-6 text-white flex justify-between items-center shadow-lg">
+        <div class="bg-gradient-to-r from-emerald-900 to-emerald-700 p-6 text-white flex justify-between items-center shadow-lg">
             <div>
                 <h1 class="text-2xl md:text-3xl font-bold flex items-center gap-3">
-                    <i data-lucide="brain-circuit" class="w-8 h-8 md:w-10 md:h-10 text-blue-200"></i> 
+                    <i data-lucide="brain-circuit" class="w-8 h-8 md:w-10 md:h-10 text-emerald-200"></i> 
                     Smart Jurnal Generator
                 </h1>
-                <p class="text-blue-100 text-sm mt-1 opacity-90">Otomatisasi Jurnal SAK EP dengan <strong>Memori Permanen</strong></p>
+                <p class="text-emerald-100 text-sm mt-1 opacity-90">Otomatisasi Jurnal dengan <strong>Standar Akun SAK EP Lengkap</strong></p>
             </div>
             <div class="text-right hidden md:block">
-                <div class="text-xs text-blue-200 bg-blue-800/50 px-3 py-1 rounded-full border border-blue-500/30">
-                    Versi 8.0 (Persistent Brain)
+                <div class="text-xs text-emerald-200 bg-emerald-800/50 px-3 py-1 rounded-full border border-emerald-500/30">
+                    Versi 9.0 (Full SAK EP)
                 </div>
             </div>
         </div>
@@ -61,21 +61,21 @@
                 <div class="flex flex-col items-center justify-center h-full space-y-8 py-10">
                     
                     <!-- Dropzone -->
-                    <div class="w-full max-w-xl border-3 border-dashed border-blue-300 rounded-2xl p-12 bg-white text-center hover:bg-blue-50 hover:border-blue-500 transition-all cursor-pointer relative group shadow-sm hover:shadow-md">
+                    <div class="w-full max-w-xl border-3 border-dashed border-emerald-300 rounded-2xl p-12 bg-white text-center hover:bg-emerald-50 hover:border-emerald-500 transition-all cursor-pointer relative group shadow-sm hover:shadow-md">
                         <input type="file" id="fileInput" accept=".csv" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
-                        <div class="mx-auto mb-6 w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 group-hover:scale-110 transition duration-300">
+                        <div class="mx-auto mb-6 w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600 group-hover:scale-110 transition duration-300">
                             <i data-lucide="upload-cloud" class="w-10 h-10"></i>
                         </div>
                         <h3 class="text-2xl font-bold text-slate-700 mb-2">Upload CSV Rekening Koran</h3>
                         <p class="text-slate-500 text-sm">Seret file ke sini atau klik untuk memilih.</p>
-                        <div class="mt-6 inline-block px-4 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded-full">
+                        <div class="mt-6 inline-block px-4 py-1 bg-emerald-100 text-emerald-700 text-xs font-bold rounded-full">
                             Mendukung Format Bank Mandiri
                         </div>
                     </div>
 
                     <!-- Info Box -->
                     <div class="max-w-xl text-center space-y-2">
-                        <div id="loading-indicator" class="hidden flex items-center justify-center gap-2 text-blue-600 font-bold bg-white px-6 py-3 rounded-full shadow-md">
+                        <div id="loading-indicator" class="hidden flex items-center justify-center gap-2 text-emerald-600 font-bold bg-white px-6 py-3 rounded-full shadow-md">
                             <i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Membaca dan Menganalisis Data...
                         </div>
                         <p class="text-xs text-slate-400">Pastikan file Anda berformat .CSV (Comma Separated Values)</p>
@@ -91,7 +91,7 @@
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                     <div>
                         <h3 class="font-bold text-xl text-slate-800 flex items-center gap-2">
-                            <i data-lucide="database" class="w-5 h-5 text-blue-600"></i> Kamus Kecerdasan
+                            <i data-lucide="database" class="w-5 h-5 text-emerald-600"></i> Kamus Kecerdasan
                         </h3>
                         <p class="text-sm text-slate-500">Aturan ini tersimpan permanen di browser Anda.</p>
                     </div>
@@ -111,25 +111,25 @@
                 </div>
 
                 <!-- Form Tambah -->
-                <div class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 p-6 rounded-xl mb-8 shadow-sm relative overflow-hidden">
-                    <div class="absolute top-0 right-0 w-32 h-32 bg-blue-200/20 rounded-full -mr-10 -mt-10 blur-2xl pointer-events-none"></div>
+                <div class="bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200 p-6 rounded-xl mb-8 shadow-sm relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-emerald-200/20 rounded-full -mr-10 -mt-10 blur-2xl pointer-events-none"></div>
                     
                     <div class="flex gap-4 items-start md:items-center">
-                        <div class="bg-blue-600 p-3 rounded-lg shadow-lg shadow-blue-600/20 hidden md:block">
+                        <div class="bg-emerald-600 p-3 rounded-lg shadow-lg shadow-emerald-600/20 hidden md:block">
                             <i data-lucide="plus" class="w-6 h-6 text-white"></i>
                         </div>
                         <div class="flex-1 w-full space-y-4">
                             <div>
-                                <h4 class="font-bold text-blue-900 text-lg">Tambah Pengetahuan Baru</h4>
-                                <p class="text-sm text-blue-700/80">Masukkan kata kunci unik dari transaksi bank agar dikenali otomatis selamanya.</p>
+                                <h4 class="font-bold text-emerald-900 text-lg">Tambah Pengetahuan Baru</h4>
+                                <p class="text-sm text-emerald-700/80">Masukkan kata kunci unik dari transaksi bank agar dikenali otomatis selamanya.</p>
                             </div>
                             
                             <div class="flex flex-col md:flex-row gap-3">
                                 <div class="flex-1">
-                                    <input id="map-keyword" placeholder="Contoh: TOKO ADIL" class="w-full input border-2 border-slate-200 focus:border-blue-500 rounded-lg px-4 py-2.5 uppercase font-bold text-slate-700 transition placeholder:font-normal" />
+                                    <input id="map-keyword" placeholder="Contoh: TOKO ADIL" class="w-full input border-2 border-slate-200 focus:border-emerald-500 rounded-lg px-4 py-2.5 uppercase font-bold text-slate-700 transition placeholder:font-normal" />
                                 </div>
                                 <div class="flex-1 relative">
-                                    <select id="map-select" class="w-full border-2 border-slate-200 focus:border-blue-500 rounded-lg px-4 py-2.5 appearance-none bg-white font-medium text-slate-700 cursor-pointer transition">
+                                    <select id="map-select" class="w-full border-2 border-slate-200 focus:border-emerald-500 rounded-lg px-4 py-2.5 appearance-none bg-white font-medium text-slate-700 cursor-pointer transition">
                                         <option value="" disabled selected>-- Pilih Akun SAK EP --</option>
                                         <!-- Populated by JS -->
                                     </select>
@@ -137,7 +137,7 @@
                                         <i data-lucide="chevron-down" class="w-4 h-4"></i>
                                     </div>
                                 </div>
-                                <button onclick="addMapping()" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-2.5 rounded-lg font-bold shadow-lg shadow-blue-600/20 transition transform active:scale-95 flex items-center justify-center gap-2">
+                                <button onclick="addMapping()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-2.5 rounded-lg font-bold shadow-lg shadow-emerald-600/20 transition transform active:scale-95 flex items-center justify-center gap-2">
                                     <i data-lucide="save" class="w-4 h-4"></i> SIMPAN
                                 </button>
                             </div>
@@ -149,7 +149,7 @@
                 <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
                     <div class="bg-slate-50 px-6 py-3 border-b border-slate-200 flex justify-between items-center">
                         <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Tabel Aturan (<span id="count-mappings">0</span>)</span>
-                        <input type="text" id="search-mapping" onkeyup="filterMappings()" placeholder="Cari aturan..." class="text-xs border rounded px-2 py-1 focus:outline-blue-500">
+                        <input type="text" id="search-mapping" onkeyup="filterMappings()" placeholder="Cari aturan..." class="text-xs border rounded px-2 py-1 focus:outline-emerald-500">
                     </div>
                     <div class="max-h-[500px] overflow-y-auto custom-scrollbar">
                         <table class="w-full text-sm text-left">
@@ -282,34 +282,137 @@
 
     <!-- JAVASCRIPT LOGIC -->
     <script>
-        // --- 1. DATABASE MASTER SAK EP ---
+        // --- 1. DATABASE MASTER SAK EP (LENGKAP) ---
+        // Sesuai dengan permintaan Pak Alhamdi
         const MASTER_AKUN_SAK_EP = [
-            { kode: 'I.1.1.1', nama: 'Kas Kecil AKM', kategori: 'ASET' },
-            { kode: 'I.1.2.1', nama: 'Bank Mandiri Induk AKM', kategori: 'ASET' },
-            { kode: 'I.3.1.1', nama: 'Piutang Simpan Pinjam Anggota', kategori: 'ASET' },
-            { kode: 'I.3.1.2', nama: 'Piutang Voucer Belanja Anggota', kategori: 'ASET' },
-            { kode: 'I.3.1.3', nama: 'Piutang Adamart Anggota', kategori: 'ASET' },
-            { kode: 'I.3.1.4', nama: 'Piutang Tiket Anggota', kategori: 'ASET' },
-            { kode: 'II.1.1', nama: 'Simpanan Sukarela', kategori: 'KEWAJIBAN' },
-            { kode: 'II.2.1', nama: 'Utang Payboss / Titipan', kategori: 'KEWAJIBAN' },
-            { kode: 'II.7', nama: 'Liabilitas Lainnya', kategori: 'KEWAJIBAN' },
-            { kode: 'IV.1.1', nama: 'Pendapatan Adamart Anggota', kategori: 'PENDAPATAN' },
-            { kode: 'IV.1.2', nama: 'Pendapatan Kredit Uang Anggota', kategori: 'PENDAPATAN' },
-            { kode: 'IV.1.6', nama: 'Pendapatan Administrasi Bank', kategori: 'PENDAPATAN' },
-            { kode: 'IV.2.13', nama: 'Pendapatan Bunga Bank', kategori: 'PENDAPATAN' },
-            { kode: 'IV.1.3', nama: 'Pendapatan Tiket Anggota', kategori: 'PENDAPATAN' },
-            { kode: 'V.3.1', nama: 'Beban Operasional', kategori: 'BEBAN' },
-            { kode: 'V.3.2', nama: 'Beban ATK', kategori: 'BEBAN' },
-            { kode: 'V.3.4', nama: 'Biaya BBM', kategori: 'BEBAN' },
-            { kode: 'V.3.7', nama: 'Beban Listrik', kategori: 'BEBAN' },
-            { kode: 'V.3.9', nama: 'Beban Telpon dan Internet', kategori: 'BEBAN' },
-            { kode: 'V.3.11', nama: 'Biaya Promosi', kategori: 'BEBAN' },
-            { kode: 'V.3.13', nama: 'Biaya Perbaikan & Pemeliharaan Kendaraan', kategori: 'BEBAN' },
-            { kode: 'V.3.17', nama: 'Biaya Administrasi Bank', kategori: 'BEBAN' },
-            { kode: 'V.3.18', nama: 'Perjalanan Dinas', kategori: 'BEBAN' },
-            { kode: 'V.3.20', nama: 'Beban Gaji Karyawan dan THR', kategori: 'BEBAN' },
-            { kode: 'V.3.22', nama: 'Beban BPJS', kategori: 'BEBAN' },
-            { kode: 'V.4.1', nama: 'Beban Honor Pengurus dan Pengawas', kategori: 'BEBAN' }
+            // I. ASET
+            { kode: 'I.1.1.1', nama: 'Kas Kecil AKM', kategori: 'I. ASET' },
+            { kode: 'I.1.1.2', nama: 'Kas Kecil Tiket', kategori: 'I. ASET' },
+            { kode: 'I.1.1.2.1', nama: 'Kas Kecil Adamart', kategori: 'I. ASET' },
+            { kode: 'I.1.1.2.2', nama: 'Kas belum disetor', kategori: 'I. ASET' },
+            { kode: 'I.1.2.1', nama: 'Bank Mandiri Induk AKM', kategori: 'I. ASET' },
+            { kode: 'I.1.2.2', nama: 'Bank Mandiri Induk Adamart', kategori: 'I. ASET' },
+            { kode: 'I.1.2.3', nama: 'Bank Mandiri Giro', kategori: 'I. ASET' },
+            { kode: 'I.1.2.4', nama: 'BNI Giro', kategori: 'I. ASET' },
+            { kode: 'I.1.2.5', nama: 'BRI Giro', kategori: 'I. ASET' },
+            { kode: 'I.1.2.6', nama: 'Bank Muamalat', kategori: 'I. ASET' },
+            { kode: 'I.1.2.7', nama: 'Bank Syariah Mandiri', kategori: 'I. ASET' },
+            { kode: 'I.2', nama: 'Piutang Bunga', kategori: 'I. ASET' },
+            { kode: 'I.3.1.1', nama: 'Piutang Simpan Pinjam Anggota', kategori: 'I. ASET' },
+            { kode: 'I.3.1.2', nama: 'Piutang Voucer Belanja Anggota', kategori: 'I. ASET' },
+            { kode: 'I.3.1.3', nama: 'Piutang Adamart Anggota', kategori: 'I. ASET' },
+            { kode: 'I.3.1.4', nama: 'Piutang Tiket Anggota', kategori: 'I. ASET' },
+            { kode: 'I.3.1.5', nama: 'Piutang Sewa Kendaraan Anggota', kategori: 'I. ASET' },
+            { kode: 'I.3.1.6', nama: 'Piutang Konsumtif Anggota', kategori: 'I. ASET' },
+            { kode: 'I.3.2.1', nama: 'Piutang Simpan Pinjam Non Anggota', kategori: 'I. ASET' },
+            { kode: 'I.3.2.2', nama: 'Piutang Adamart Non Anggota', kategori: 'I. ASET' },
+            { kode: 'I.3.2.3', nama: 'Piutang Lembaga Non Anggota', kategori: 'I. ASET' },
+            { kode: 'I.3.2.4', nama: 'Piutang Tiket Non Anggota', kategori: 'I. ASET' },
+            { kode: 'I.3.2.5', nama: 'Piutang Sewa Kendaraan Non Anggota', kategori: 'I. ASET' },
+            { kode: 'I.3.2.6', nama: 'Piutang Barang Elektronik Non Anggota', kategori: 'I. ASET' },
+            { kode: 'I.3.2.7', nama: 'Piutang Usaha Tidak Lancar', kategori: 'I. ASET' },
+            { kode: 'I.3.2.8', nama: 'Pendapatan yang masih harus diterima', kategori: 'I. ASET' },
+            { kode: 'I.3.2.9', nama: 'Persediaan Adamart', kategori: 'I. ASET' },
+            { kode: 'I.4', nama: 'Penyisihan Piutang Tak Tertagih', kategori: 'I. ASET' },
+            { kode: 'I.5', nama: 'Pinjaman Koperasi Lain', kategori: 'I. ASET' },
+            { kode: 'I.7.1', nama: 'Tanah', kategori: 'I. ASET' },
+            { kode: 'I.7.2', nama: 'Bangunan', kategori: 'I. ASET' },
+            { kode: 'I.7.3', nama: 'Mesin Dan Kendaraan', kategori: 'I. ASET' },
+            { kode: 'I.7.4', nama: 'Inventaris dan Peralatan Kantor', kategori: 'I. ASET' },
+            { kode: 'I.8.1', nama: 'Akumulasi Penyusutan Tanah', kategori: 'I. ASET' },
+            { kode: 'I.8.2', nama: 'Akumulasi Penyusutan Bangunan', kategori: 'I. ASET' },
+            { kode: 'I.8.3', nama: 'Akumulasi Penyusutan Kendaraan', kategori: 'I. ASET' },
+            { kode: 'I.8.4', nama: 'Akumulasi Penyusutan Peralatan Kantor', kategori: 'I. ASET' },
+            { kode: 'I.9.1', nama: 'Program Komputer dan Aplikasi Keuangan', kategori: 'I. ASET' },
+            { kode: 'I.10.1', nama: 'Akumulasi Amortisasi Komputer & App', kategori: 'I. ASET' },
+            { kode: 'I.11', nama: 'Aset Lainnya', kategori: 'I. ASET' },
+
+            // II. LIABILITAS
+            { kode: 'II.1', nama: 'Utang Bunga', kategori: 'II. LIABILITAS' },
+            { kode: 'II.2.1', nama: 'Simpanan Sukarela', kategori: 'II. LIABILITAS' },
+            { kode: 'II.2.2', nama: 'Simpanan Sukarela Berjangka', kategori: 'II. LIABILITAS' },
+            { kode: 'II.3.1', nama: 'Dana Pendidikan', kategori: 'II. LIABILITAS' },
+            { kode: 'II.3.2', nama: 'Dana Pembangunan', kategori: 'II. LIABILITAS' },
+            { kode: 'II.3.3', nama: 'Dana Sosial', kategori: 'II. LIABILITAS' },
+            { kode: 'II.4', nama: 'Simpanan Koperasi Lain', kategori: 'II. LIABILITAS' },
+            { kode: 'II.5', nama: 'Utang Pinjaman', kategori: 'II. LIABILITAS' },
+            { kode: 'II.6', nama: 'Liabilitas Imbalan Kerja', kategori: 'II. LIABILITAS' },
+            { kode: 'II.7', nama: 'Liabilitas Lainnya', kategori: 'II. LIABILITAS' },
+
+            // III. EKUITAS
+            { kode: 'III.1', nama: 'Simpanan Pokok/Modal Tetap', kategori: 'III. EKUITAS' },
+            { kode: 'III.2', nama: 'Simpanan Wajib/Modal Tambahan', kategori: 'III. EKUITAS' },
+            { kode: 'III.3', nama: 'Cadangan Umum', kategori: 'III. EKUITAS' },
+            { kode: 'III.4', nama: 'Cadangan Resiko', kategori: 'III. EKUITAS' },
+            { kode: 'III.5', nama: 'Sisa Hasil Usaha', kategori: 'III. EKUITAS' },
+            { kode: 'III.6', nama: 'Ekuitas Lainnya', kategori: 'III. EKUITAS' },
+
+            // IV. PENDAPATAN
+            { kode: 'IV.1.1', nama: 'Pendapatan Adamart Anggota', kategori: 'IV. PENDAPATAN' },
+            { kode: 'IV.1.2', nama: 'Pendapatan Kredit Uang Anggota', kategori: 'IV. PENDAPATAN' },
+            { kode: 'IV.1.3', nama: 'Pendapatan Tiket Anggota', kategori: 'IV. PENDAPATAN' },
+            { kode: 'IV.1.4', nama: 'Pendapatan Voucer Anggota', kategori: 'IV. PENDAPATAN' },
+            { kode: 'IV.1.5', nama: 'Pendapatan Pinjaman Konsumtif Anggota', kategori: 'IV. PENDAPATAN' },
+            { kode: 'IV.1.6', nama: 'Pendapatan Administrasi Bank', kategori: 'IV. PENDAPATAN' },
+            { kode: 'IV.1.7', nama: 'Pendapatan Denda Administrasi', kategori: 'IV. PENDAPATAN' },
+            { kode: 'IV.1.8', nama: 'Pendapatan Administrasi Realisasi Pinjaman', kategori: 'IV. PENDAPATAN' },
+            { kode: 'IV.2.1', nama: 'Pendapatan Kredit Uang Non Anggota (SIS)', kategori: 'IV. PENDAPATAN' },
+            { kode: 'IV.2.2', nama: 'Pendapatan Kredit Uang Non Anggota (BUMA)', kategori: 'IV. PENDAPATAN' },
+            { kode: 'IV.2.3', nama: 'Pendapatan Pinjaman Konsumtif Non Anggota', kategori: 'IV. PENDAPATAN' },
+            { kode: 'IV.2.4', nama: 'Pendapatan dari Pinjaman ke Lembaga lain', kategori: 'IV. PENDAPATAN' },
+            { kode: 'IV.2.5', nama: 'Pendapatan Dividen (SKV)', kategori: 'IV. PENDAPATAN' },
+            { kode: 'IV.2.6', nama: 'Pendapatan selisih penjualan Tiket Non Anggota', kategori: 'IV. PENDAPATAN' },
+            { kode: 'IV.2.7', nama: 'Pendapatan selisih penjualan Vouc. Hotel Non Anggota', kategori: 'IV. PENDAPATAN' },
+            { kode: 'IV.2.8', nama: 'Pendapatan Sewa Mobil Non Anggota', kategori: 'IV. PENDAPATAN' },
+            { kode: 'IV.2.9', nama: 'Pendapatan Sewa Gedung Kopkarindo', kategori: 'IV. PENDAPATAN' },
+            { kode: 'IV.2.10', nama: 'Pendapatan Barang Titipan Adamart', kategori: 'IV. PENDAPATAN' },
+            { kode: 'IV.2.11', nama: 'Pendapatan Pesanan Kotakan Non Anggota', kategori: 'IV. PENDAPATAN' },
+            { kode: 'IV.2.12', nama: 'Pendapatan Delivery Order', kategori: 'IV. PENDAPATAN' },
+            { kode: 'IV.2.13', nama: 'Pendapatan Bunga Bank', kategori: 'IV. PENDAPATAN' },
+            { kode: 'IV.2.14', nama: 'Pendapatan Komisi Hapeworld', kategori: 'IV. PENDAPATAN' },
+            { kode: 'IV.2.15', nama: 'Pendapatan Komisi Aplikasi Tiket TTR', kategori: 'IV. PENDAPATAN' },
+
+            // V. BEBAN
+            { kode: 'V.1.1', nama: 'Beban Jasa Simpanan Sukarela', kategori: 'V. BEBAN POKOK' },
+            { kode: 'V.1.2', nama: 'Beban Jasa Simpanan Sukarela Berjangka', kategori: 'V. BEBAN POKOK' },
+            { kode: 'V.1.3', nama: 'Beban Payroll Potongan', kategori: 'V. BEBAN POKOK' },
+            { kode: 'V.1.4', nama: 'Beban Pokok Penjualan', kategori: 'V. BEBAN POKOK' },
+            { kode: 'V.1.5', nama: 'Beban Bunga Pinjaman Lembaga Lain (PT.MBK)', kategori: 'V. BEBAN POKOK' },
+            { kode: 'V.2', nama: 'Pinjaman yang diberikan pada Non Anggota', kategori: 'V. BEBAN POKOK' },
+            
+            { kode: 'V.3.1', nama: 'Beban Operasional', kategori: 'V. BEBAN OPERASIONAL' },
+            { kode: 'V.3.2', nama: 'Beban ATK', kategori: 'V. BEBAN OPERASIONAL' },
+            { kode: 'V.3.3', nama: 'Biaya Pra Audit', kategori: 'V. BEBAN OPERASIONAL' },
+            { kode: 'V.3.4', nama: 'Biaya BBM', kategori: 'V. BEBAN OPERASIONAL' },
+            { kode: 'V.3.5', nama: 'Biaya THR Karyawan', kategori: 'V. BEBAN OPERASIONAL' },
+            { kode: 'V.3.6', nama: 'Biaya Intertaiment', kategori: 'V. BEBAN OPERASIONAL' },
+            { kode: 'V.3.7', nama: 'Beban Listrik', kategori: 'V. BEBAN OPERASIONAL' },
+            { kode: 'V.3.8', nama: 'Beban PDAM', kategori: 'V. BEBAN OPERASIONAL' },
+            { kode: 'V.3.9', nama: 'Beban Telpon dan Internet', kategori: 'V. BEBAN OPERASIONAL' },
+            { kode: 'V.3.10', nama: 'Beban TV Kabel', kategori: 'V. BEBAN OPERASIONAL' },
+            { kode: 'V.3.11', nama: 'Biaya Promosi', kategori: 'V. BEBAN OPERASIONAL' },
+            { kode: 'V.3.12', nama: 'Kesejahteraan Karyawan', kategori: 'V. BEBAN OPERASIONAL' },
+            { kode: 'V.3.13', nama: 'Biaya Perbaikan dan Pemeliharaan Kendaraan', kategori: 'V. BEBAN OPERASIONAL' },
+            { kode: 'V.3.14', nama: 'Biaya Perbaikan dan Pemeliharaan Peralatan', kategori: 'V. BEBAN OPERASIONAL' },
+            { kode: 'V.3.15', nama: 'Biaya Perlengkapan', kategori: 'V. BEBAN OPERASIONAL' },
+            { kode: 'V.3.16', nama: 'Beban Pajak Bumi dan Bangunan', kategori: 'V. BEBAN OPERASIONAL' },
+            { kode: 'V.3.17', nama: 'Biaya Administrasi Bank', kategori: 'V. BEBAN OPERASIONAL' },
+            { kode: 'V.3.18', nama: 'Perjalanan Dinas', kategori: 'V. BEBAN OPERASIONAL' },
+            { kode: 'V.3.19', nama: 'Pajak Kendaraan R4', kategori: 'V. BEBAN OPERASIONAL' },
+            { kode: 'V.3.20', nama: 'Beban Gaji Karyawan dan THR', kategori: 'V. BEBAN OPERASIONAL' },
+            { kode: 'V.3.21', nama: 'Beban Alat Pelindung Diri', kategori: 'V. BEBAN OPERASIONAL' },
+            { kode: 'V.3.22', nama: 'Beban BPJS', kategori: 'V. BEBAN OPERASIONAL' },
+            { kode: 'V.3.23', nama: 'Beban MCU', kategori: 'V. BEBAN OPERASIONAL' },
+            { kode: 'V.3.24', nama: 'Beban GPS', kategori: 'V. BEBAN OPERASIONAL' },
+            { kode: 'V.3.25', nama: 'Beban Barang Rusak', kategori: 'V. BEBAN OPERASIONAL' },
+            { kode: 'V.3.26', nama: 'Beban Piutang Tak Tertagih', kategori: 'V. BEBAN OPERASIONAL' },
+            
+            { kode: 'V.4.1', nama: 'Beban Honor Pengurus dan Pengawas', kategori: 'V. BEBAN PERKOPERASIAN' },
+            { kode: 'V.4.2', nama: 'THR Pengurus dan Pengawas', kategori: 'V. BEBAN PERKOPERASIAN' },
+            { kode: 'V.4.3', nama: 'Biaya RAT', kategori: 'V. BEBAN PERKOPERASIAN' },
+            { kode: 'V.4.4', nama: 'Jamuan dan Representasi Tamu', kategori: 'V. BEBAN PERKOPERASIAN' },
+            
+            { kode: 'V.5.1', nama: 'Beban Administrasi dan Umum', kategori: 'V. BEBAN ADM UMUM' },
         ];
 
         // Default Mappings (Initial Seed)
@@ -384,12 +487,12 @@
             
             // Buttons UI
             document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('text-blue-600', 'border-blue-600');
+                btn.classList.remove('text-emerald-600', 'border-emerald-600');
                 btn.classList.add('text-slate-400', 'border-transparent');
             });
             const activeBtn = document.getElementById(`tab-${tabName}`);
             activeBtn.classList.remove('text-slate-400', 'border-transparent');
-            activeBtn.classList.add('text-blue-600', 'border-blue-600');
+            activeBtn.classList.add('text-emerald-600', 'border-emerald-600');
 
             // View Sections
             document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
@@ -401,7 +504,9 @@
         // --- 5. MAPPING LOGIC ---
         function populateDropdowns() {
             const select = document.getElementById('map-select');
-            const categories = ['ASET', 'KEWAJIBAN', 'PENDAPATAN', 'BEBAN'];
+            
+            // Dapatkan kategori unik dari master data
+            const categories = [...new Set(MASTER_AKUN_SAK_EP.map(item => item.kategori))];
             
             let html = '<option value="" disabled selected>-- Pilih Akun SAK EP --</option>';
             categories.forEach(cat => {
@@ -409,7 +514,7 @@
                 if (items.length > 0) {
                     html += `<optgroup label="${cat}">`;
                     items.forEach(item => {
-                        html += `<option value="${item.kode}">${item.nama} (${item.kode})</option>`;
+                        html += `<option value="${item.kode}">${item.kode} - ${item.nama}</option>`;
                     });
                     html += `</optgroup>`;
                 }
@@ -434,7 +539,7 @@
 
             tbody.innerHTML = filtered.map(m => `
                 <tr class="hover:bg-slate-50 transition border-b group">
-                    <td class="p-4 font-mono font-bold text-blue-700">${m.keyword}</td>
+                    <td class="p-4 font-mono font-bold text-emerald-700">${m.keyword}</td>
                     <td class="p-4 text-slate-700 font-medium">${m.akun}</td>
                     <td class="p-4 font-mono text-slate-500 text-xs bg-slate-50 rounded">${m.kode}</td>
                     <td class="p-4 text-center">
@@ -525,6 +630,7 @@
             const lines = text.split('\n');
             const result = [];
             const splitLine = (line) => {
+                // Regex to split by comma but ignore commas inside quotes
                 const regex = /,(?=(?:(?:[^"]*"){2})*[^"]*$)/; 
                 return line.split(regex).map(s => s.replace(/^"|"$/g, '').trim());
             };
@@ -623,7 +729,7 @@
 
             const masuk = [];
             const keluar = [];
-            const bankCode = "I.1.2.1"; 
+            const bankCode = "I.1.2.1"; // Bank Mandiri Default
             
             fileData.forEach(item => {
                 const { akun, kode } = identifyAccount(item.ket);
@@ -654,21 +760,24 @@
         // --- 7. RESULT TABLE & EDITING WITH "LEARN" FEATURE ---
         function getDropdownHTML(selectedKode, type, id) {
             const isManual = selectedKode === 'CEK';
+            
+            // Dapatkan kategori unik
+            const categories = [...new Set(MASTER_AKUN_SAK_EP.map(item => item.kategori))];
+
             let html = `
             <div class="relative group-select">
                 <select onchange="handleEdit('${type}', ${id}, this.value)" 
-                class="w-full border rounded-lg px-3 py-2 appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-xs font-medium
-                ${isManual ? 'border-red-300 bg-red-50 text-red-800' : 'border-slate-200 bg-white text-slate-700'}">`;
+                class="w-full border rounded-lg px-3 py-2 appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500 transition text-xs font-medium
+                ${isManual ? 'border-red-300 bg-red-50 text-red-800 font-bold' : 'border-slate-200 bg-white text-slate-700'}">`;
             
-            html += `<option value="" disabled>-- Pilih --</option>`;
+            html += `<option value="" disabled>-- Pilih Akun --</option>`;
             if(isManual) html += `<option value="CEK" selected>⚠️ CEK MANUAL</option>`;
 
-            const categories = ['ASET', 'KEWAJIBAN', 'PENDAPATAN', 'BEBAN'];
             categories.forEach(cat => {
                 html += `<optgroup label="${cat}">`;
                 MASTER_AKUN_SAK_EP.filter(x => x.kategori === cat).forEach(acc => {
                     const isSel = acc.kode === selectedKode ? 'selected' : '';
-                    html += `<option value="${acc.kode}" ${isSel}>${acc.nama}</option>`;
+                    html += `<option value="${acc.kode}" ${isSel}>${acc.kode} - ${acc.nama}</option>`;
                 });
                 html += `</optgroup>`;
             });
@@ -679,7 +788,7 @@
             if(!isManual) {
                 // If it was manual before, this button allows saving the rule
                 html += `
-                <button onclick="teachAI('${type}', ${id})" class="mt-1 text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded hover:bg-blue-200 w-full flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity" title="Simpan aturan ini ke Kamus agar otomatis kedepannya">
+                <button onclick="teachAI('${type}', ${id})" class="mt-1 text-[10px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded hover:bg-emerald-200 w-full flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity" title="Simpan aturan ini ke Kamus agar otomatis kedepannya">
                     <i data-lucide="brain-circuit" class="w-3 h-3"></i> Simpan ke Kamus
                 </button>
                 `;
@@ -759,7 +868,7 @@
                     <td class="p-3 align-top text-slate-500 font-mono">${row.tanggal}</td>
                     <td class="p-3 align-top text-slate-700">
                         <div class="line-clamp-2" title="${row.uraian}">${row.uraian}</div>
-                        <div class="text-[10px] text-slate-400 mt-1">${row.bukti}</div>
+                        <div class="text-[10px] text-slate-400 mt-1 font-mono">${row.bukti}</div>
                     </td>
                     <td class="p-3 align-top">
                         ${getDropdownHTML(row.kode_lawan, type, row.id)}
@@ -798,7 +907,7 @@
                 title: 'Ajarkan Logika Baru',
                 input: 'text',
                 inputLabel: `Masukkan KATA KUNCI unik dari uraian ini:`,
-                inputValue: item.uraian, // Default value full uraian, user should shorten it
+                inputValue: item.uraian, 
                 inputPlaceholder: 'Contoh: TOKO BERKAH',
                 showCancelButton: true,
                 confirmButtonText: 'Simpan ke Kamus',
