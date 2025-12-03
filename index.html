@@ -1,0 +1,548 @@
+import React, { useState, useEffect } from 'react';
+import { Upload, FileText, Download, Trash2, Plus, ArrowRight, CheckCircle, AlertCircle, Search, Filter, Edit3, Save } from 'lucide-react';
+
+// --- DATABASE MASTER AKUN SAK EP (HARDCODED) ---
+const MASTER_AKUN_SAK_EP = [
+  // ASET
+  { kode: 'I.1.1.1', nama: 'Kas Kecil AKM', kategori: 'ASET' },
+  { kode: 'I.1.2.1', nama: 'Bank Mandiri Induk AKM', kategori: 'ASET' },
+  { kode: 'I.3.1.1', nama: 'Piutang Simpan Pinjam Anggota', kategori: 'ASET' },
+  { kode: 'I.3.1.2', nama: 'Piutang Voucer Belanja Anggota', kategori: 'ASET' },
+  { kode: 'I.3.1.3', nama: 'Piutang Adamart Anggota', kategori: 'ASET' },
+  { kode: 'I.3.1.4', nama: 'Piutang Tiket Anggota', kategori: 'ASET' },
+  
+  // KEWAJIBAN
+  { kode: 'II.1.1', nama: 'Simpanan Sukarela', kategori: 'KEWAJIBAN' },
+  { kode: 'II.2.1', nama: 'Utang Payboss / Titipan', kategori: 'KEWAJIBAN' },
+  { kode: 'II.7', nama: 'Liabilitas Lainnya', kategori: 'KEWAJIBAN' },
+  
+  // PENDAPATAN
+  { kode: 'IV.1.1', nama: 'Pendapatan Adamart Anggota', kategori: 'PENDAPATAN' },
+  { kode: 'IV.1.2', nama: 'Pendapatan Kredit Uang Anggota', kategori: 'PENDAPATAN' },
+  { kode: 'IV.1.6', nama: 'Pendapatan Administrasi Bank', kategori: 'PENDAPATAN' },
+  { kode: 'IV.2.13', nama: 'Pendapatan Bunga Bank', kategori: 'PENDAPATAN' },
+  { kode: 'IV.1.3', nama: 'Pendapatan Tiket Anggota', kategori: 'PENDAPATAN' },
+  
+  // BEBAN
+  { kode: 'V.3.1', nama: 'Beban Operasional', kategori: 'BEBAN' },
+  { kode: 'V.3.2', nama: 'Beban ATK', kategori: 'BEBAN' },
+  { kode: 'V.3.4', nama: 'Biaya BBM', kategori: 'BEBAN' },
+  { kode: 'V.3.7', nama: 'Beban Listrik', kategori: 'BEBAN' },
+  { kode: 'V.3.9', nama: 'Beban Telpon dan Internet', kategori: 'BEBAN' },
+  { kode: 'V.3.11', nama: 'Biaya Promosi', kategori: 'BEBAN' },
+  { kode: 'V.3.13', nama: 'Biaya Perbaikan & Pemeliharaan Kendaraan', kategori: 'BEBAN' },
+  { kode: 'V.3.17', nama: 'Biaya Administrasi Bank', kategori: 'BEBAN' },
+  { kode: 'V.3.18', nama: 'Perjalanan Dinas', kategori: 'BEBAN' },
+  { kode: 'V.3.20', nama: 'Beban Gaji Karyawan dan THR', kategori: 'BEBAN' },
+  { kode: 'V.3.22', nama: 'Beban BPJS', kategori: 'BEBAN' },
+  { kode: 'V.4.1', nama: 'Beban Honor Pengurus dan Pengawas', kategori: 'BEBAN' },
+];
+
+// --- MAPPING AWAL ---
+const INITIAL_MAPPINGS = [
+  { id: 1, keyword: 'YULIANT', akun: 'Piutang Simpan Pinjam Anggota', kode: 'I.3.1.1' },
+  { id: 2, keyword: 'ZAINAL', akun: 'Piutang Simpan Pinjam Anggota', kode: 'I.3.1.1' },
+  { id: 3, keyword: 'TARIK TUNAI', akun: 'Kas Kecil AKM', kode: 'I.1.1.1' },
+  { id: 4, keyword: 'OPRASIONAL', akun: 'Beban Operasional', kode: 'V.3.1' },
+  { id: 5, keyword: 'ADM', akun: 'Biaya Administrasi Bank', kode: 'V.3.17' },
+  { id: 6, keyword: 'BIAYA', akun: 'Biaya Administrasi Bank', kode: 'V.3.17' },
+  { id: 7, keyword: 'BUNGA', akun: 'Pendapatan Bunga Bank', kode: 'IV.2.13' },
+  { id: 8, keyword: 'PAJAK', akun: 'Biaya Administrasi Bank', kode: 'V.3.17' },
+  { id: 9, keyword: 'GAJI', akun: 'Beban Gaji Karyawan dan THR', kode: 'V.3.20' },
+  { id: 10, keyword: 'HONOR', akun: 'Beban Honor Pengurus dan Pengawas', kode: 'V.4.1' },
+  { id: 11, keyword: 'PAYBOSS', akun: 'Utang Payboss / Titipan', kode: 'II.2.1' },
+  { id: 12, keyword: 'LISTRIK', akun: 'Beban Listrik', kode: 'V.3.7' },
+  { id: 13, keyword: 'ATK', akun: 'Beban ATK', kode: 'V.3.2' },
+  { id: 14, keyword: 'BBM', akun: 'Biaya BBM', kode: 'V.3.4' },
+];
+
+export default function App() {
+  const [mappings, setMappings] = useState(INITIAL_MAPPINGS);
+  const [fileData, setFileData] = useState([]);
+  const [processedData, setProcessedData] = useState({ masuk: [], keluar: [] });
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [activeTab, setActiveTab] = useState('upload'); 
+  const [newMap, setNewMap] = useState({ keyword: '', akun: '', kode: '' });
+  const [unidentifiedCount, setUnidentifiedCount] = useState(0);
+  
+  // STATE BARU: Filter Mode & Editing
+  const [showOnlyManual, setShowOnlyManual] = useState(false);
+  // Kita simpan status apakah data sudah diedit manual agar tidak tertimpa auto-process
+  const [hasManualEdits, setHasManualEdits] = useState(false);
+
+  // Auto-process saat mapping berubah, TAPI HANYA JIKA belum ada edit manual
+  // Agar kerjaan manual user tidak hilang saat dia pindah tab
+  useEffect(() => {
+    if (fileData.length > 0 && !hasManualEdits) {
+      processJurnal(fileData);
+    }
+  }, [mappings, fileData]);
+
+  // --- FUNGSI MAPPING ---
+  const handleAccountSelect = (e) => {
+    const selectedKode = e.target.value;
+    const selectedAccount = MASTER_AKUN_SAK_EP.find(item => item.kode === selectedKode);
+    if (selectedAccount) {
+      setNewMap({ ...newMap, akun: selectedAccount.nama, kode: selectedAccount.kode });
+    }
+  };
+
+  const addMapping = () => {
+    if (newMap.keyword && newMap.akun) {
+      setMappings([...mappings, { ...newMap, id: Date.now() }]);
+      setNewMap({ keyword: '', akun: '', kode: '' });
+      setHasManualEdits(false); // Reset manual edits flag to allow re-process
+    }
+  };
+
+  const removeMapping = (id) => {
+    setMappings(mappings.filter(m => m.id !== id));
+    setHasManualEdits(false);
+  };
+
+  // --- PARSE CSV ---
+  const parseCSV = (text) => {
+    const lines = text.split('\n');
+    const result = [];
+    const splitCSVLine = (line) => {
+        const regex = /,(?=(?:(?:[^"]*"){2})*[^"]*$)/; 
+        return line.split(regex).map(s => s.replace(/^"|"$/g, '').trim());
+    };
+    lines.forEach((line) => {
+        if (!line.trim()) return;
+        try { result.push(splitCSVLine(line)); } catch (e) {}
+    });
+    return result;
+  };
+
+  const cleanCurrency = (str) => {
+      if (typeof str === 'number') return str;
+      if (!str) return 0;
+      let clean = str.toString().replace(/[^0-9,.-]/g, '');
+      if (clean.includes(',') && !clean.includes('.')) {
+         clean = clean.replace(',', '.');
+      } else if (clean.includes('.') && clean.includes(',')) {
+          const lastComma = clean.lastIndexOf(',');
+          const lastDot = clean.lastIndexOf('.');
+          if (lastComma > lastDot) clean = clean.replace(/\./g, '').replace(',', '.');
+          else clean = clean.replace(/,/g, '');
+      }
+      return parseFloat(clean) || 0;
+  };
+
+  // --- PROSES DATA ---
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setIsProcessing(true);
+    setHasManualEdits(false); // Reset edit flag on new file
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      const bstr = evt.target.result;
+      const data = parseCSV(bstr); 
+      let headerRowIndex = 0;
+      data.forEach((row, index) => {
+        const rowStr = JSON.stringify(row).toUpperCase();
+        if ((rowStr.includes("TANGGAL") || rowStr.includes("TGL") || rowStr.includes("VAL")) && 
+            (rowStr.includes("URAIAN") || rowStr.includes("KETERANGAN"))) {
+           headerRowIndex = index;
+        }
+      });
+      
+      let colIdx = { tgl: 1, ket: 2, deb: 4, kre: 5 }; 
+      if (data[headerRowIndex]) {
+          const headerRow = data[headerRowIndex].map(s => s ? s.toUpperCase() : "");
+          headerRow.forEach((col, i) => {
+              if (col.includes("TGL") || col.includes("TANGGAL")) colIdx.tgl = i;
+              else if (col.includes("URAIAN") || col.includes("KETERANGAN") || col.includes("TRANSAKSI")) colIdx.ket = i;
+              else if (col.includes("DEBIT") || col.includes("DEBET")) colIdx.deb = i;
+              else if (col.includes("KREDIT")) colIdx.kre = i;
+          });
+      }
+
+      const cleanData = [];
+      data.forEach((row, index) => {
+        if (index > headerRowIndex && row.length > 2) {
+           let tgl = row[colIdx.tgl]; 
+           let ket = row[colIdx.ket];
+           let deb = cleanCurrency(row[colIdx.deb]);
+           let kre = cleanCurrency(row[colIdx.kre]);
+           // Tambahkan ID unik untuk keperluan edit
+           if(tgl && (deb > 0 || kre > 0)) cleanData.push({ id: index, tgl, ket, deb, kre });
+        }
+      });
+      setFileData(cleanData);
+      setIsProcessing(false);
+      setActiveTab('result');
+    };
+    reader.readAsText(file); 
+  };
+
+  const identifyAccount = (desc) => {
+    if (!desc) return { akun: "TANPA KETERANGAN", kode: "0-000" };
+    const upperDesc = desc.toString().toUpperCase();
+    for (const m of mappings) {
+      if (upperDesc.includes(m.keyword.toUpperCase())) return { akun: m.akun, kode: m.kode };
+    }
+    return { akun: "PERIKSA MANUAL", kode: "CEK" };
+  };
+
+  const processJurnal = (data) => {
+    const masuk = [];
+    const keluar = [];
+    const bankCode = "I.1.2.1"; 
+    let manualCount = 0;
+
+    data.forEach((item) => {
+      const { akun, kode } = identifyAccount(item.ket);
+      if (kode === "CEK") manualCount++;
+
+      // Object jurnal dengan ID dari data asli agar konsisten
+      const jurnalItem = {
+        id: item.id,
+        tanggal: item.tgl,
+        uraian: item.ket,
+        // Kita simpan field dinamis (debit/kredit)
+        // Jika Kas Keluar: Debit = Akun Lawan, Kredit = Bank
+        // Jika Kas Masuk: Debit = Bank, Kredit = Akun Lawan
+        akun_lawan: akun,
+        kode_lawan: kode,
+        bank_akun: "Bank Mandiri Induk AKM",
+        bank_kode: bankCode,
+        jumlah: item.deb > 0 ? item.deb : item.kre,
+        tipe: item.deb > 0 ? 'keluar' : 'masuk',
+        bukti: item.deb > 0 
+          ? `BKK-${(keluar.length + 1).toString().padStart(4, '0')}`
+          : `BKM-${(masuk.length + 1).toString().padStart(4, '0')}`
+      };
+
+      if (item.deb > 0) keluar.push(jurnalItem);
+      else if (item.kre > 0) masuk.push(jurnalItem);
+    });
+
+    setUnidentifiedCount(manualCount);
+    setProcessedData({ masuk, keluar });
+  };
+
+  // --- FUNGSI EDIT LIVE (BARU) ---
+  const handleEditRow = (type, id, newKode) => {
+    setHasManualEdits(true); // Tandai sudah ada edit manual
+    const selectedAccount = MASTER_AKUN_SAK_EP.find(a => a.kode === newKode);
+    if (!selectedAccount) return;
+
+    setProcessedData(prev => {
+      const list = [...prev[type]];
+      const index = list.findIndex(item => item.id === id);
+      if (index !== -1) {
+        // Update Akun Lawan & Kode Lawan
+        list[index] = {
+          ...list[index],
+          akun_lawan: selectedAccount.nama,
+          kode_lawan: selectedAccount.kode
+        };
+      }
+      
+      // Recalculate unidentified count
+      const allItems = [...prev.masuk, ...prev.keluar];
+      // Karena kita edit 'list' (salah satu array), kita perlu gabungkan state baru + state lama
+      const updatedAll = type === 'masuk' 
+         ? [...list, ...prev.keluar]
+         : [...prev.masuk, ...list];
+         
+      const newCount = updatedAll.filter(i => i.kode_lawan === 'CEK').length;
+      setUnidentifiedCount(newCount);
+
+      return {
+        ...prev,
+        [type]: list
+      };
+    });
+  };
+
+  const downloadCSV = (data, filename) => {
+    if (data.length === 0) return alert("Data kosong!");
+    // Format untuk CSV Laporan (Sesuaikan kolom yang diinginkan user)
+    // Format: Tanggal, Bukti, Uraian, Akun Debit, Kode Debit, Akun Kredit, Kode Kredit, Jumlah
+    
+    // Header
+    const headers = "TANGGAL,NO BUKTI,URAIAN,AKUN DEBIT,KODE DEBIT,AKUN KREDIT,KODE KREDIT,JUMLAH";
+    
+    const rows = data.map(item => {
+       const isKeluar = item.tipe === 'keluar';
+       // Jika Keluar: Debit = Lawan, Kredit = Bank
+       // Jika Masuk: Debit = Bank, Kredit = Lawan
+       
+       const akunDeb = isKeluar ? item.akun_lawan : item.bank_akun;
+       const kodeDeb = isKeluar ? item.kode_lawan : item.bank_kode;
+       const akunKre = isKeluar ? item.bank_akun : item.akun_lawan;
+       const kodeKre = isKeluar ? item.bank_kode : item.kode_lawan;
+       
+       return [
+         item.tanggal,
+         item.bukti,
+         `"${item.uraian.replace(/"/g, '""')}"`,
+         akunDeb,
+         kodeDeb,
+         akunKre,
+         kodeKre,
+         item.jumlah
+       ].join(",");
+    }).join("\n");
+    
+    const link = document.createElement("a");
+    link.setAttribute("href", encodeURI("data:text/csv;charset=utf-8," + headers + "\n" + rows));
+    link.setAttribute("download", filename);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-50 font-sans text-slate-800 p-6">
+      <div className="max-w-7xl mx-auto bg-white shadow-xl rounded-xl overflow-hidden">
+        
+        {/* HEADER */}
+        <div className="bg-blue-800 p-6 text-white flex justify-between items-center">
+          <div>
+            <h1 className="text-2xl font-bold flex items-center gap-2">
+              <FileText className="w-8 h-8" /> Smart Jurnal Generator
+            </h1>
+            <p className="text-blue-100 text-sm mt-1">Otomatisasi Jurnal SAK EP + Live Editor</p>
+          </div>
+          <div className="text-right text-xs text-blue-200">Versi 6.0 (Live Edit)</div>
+        </div>
+
+        {/* NAVIGATION */}
+        <div className="flex border-b border-slate-200 bg-white sticky top-0 z-20">
+          {['upload', 'mapping', 'result'].map((tab, idx) => (
+            <button 
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`flex-1 py-4 font-semibold text-sm capitalize transition ${activeTab === tab ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50' : 'text-slate-500 hover:bg-slate-50'}`}
+            >
+              {idx + 1}. {tab === 'upload' ? 'Upload Data' : tab === 'mapping' ? 'Kamus Akun' : 'Hasil & Edit'}
+              {tab === 'result' && unidentifiedCount > 0 && <span className="ml-2 bg-red-500 text-white px-2 py-0.5 rounded-full text-[10px]">{unidentifiedCount}</span>}
+            </button>
+          ))}
+        </div>
+
+        {/* CONTENT */}
+        <div className="p-6 min-h-[500px]">
+          
+          {/* TAB 1: UPLOAD */}
+          {activeTab === 'upload' && (
+            <div className="flex flex-col items-center justify-center h-full space-y-6 py-10">
+              <div className="w-full max-w-lg border-2 border-dashed border-blue-300 rounded-xl p-12 bg-blue-50 text-center hover:bg-blue-100 transition cursor-pointer relative group">
+                <input type="file" accept=".csv" onChange={handleFileUpload} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                <Upload className="w-16 h-16 text-blue-500 mx-auto mb-4 group-hover:scale-110 transition" />
+                <h3 className="text-xl font-bold text-blue-800">Upload File CSV</h3>
+                <p className="text-slate-500 mt-2">Rekening Koran Bank Mandiri/Lainnya</p>
+              </div>
+              {isProcessing && <div className="text-blue-600 animate-pulse font-semibold">Sedang membaca data...</div>}
+            </div>
+          )}
+
+          {/* TAB 2: MAPPING */}
+          {activeTab === 'mapping' && (
+            <div>
+              <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg mb-6 flex gap-4 items-center">
+                 <div className="bg-blue-100 p-2 rounded-full"><Plus className="w-6 h-6 text-blue-600"/></div>
+                 <div className="flex-1">
+                    <h4 className="font-bold text-blue-900">Tambah Kata Kunci Baru</h4>
+                    <p className="text-sm text-blue-700 mb-2">Aturan Global: Kata kunci yang ditambah di sini akan berlaku untuk SEMUA transaksi.</p>
+                    
+                    <div className="flex gap-2 items-center">
+                      <input 
+                        placeholder="Kata Kunci (Mis: TOKO ADIL)" 
+                        value={newMap.keyword}
+                        onChange={e => setNewMap({...newMap, keyword: e.target.value})}
+                        className="input input-sm border border-slate-300 rounded px-3 py-2 w-1/3 uppercase font-semibold"
+                      />
+                      <div className="relative flex-1">
+                        <select 
+                          onChange={handleAccountSelect}
+                          className="w-full border border-slate-300 rounded px-3 py-2 appearance-none bg-white font-medium text-slate-700 cursor-pointer hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          value={newMap.kode || ""}
+                        >
+                          <option value="" disabled>-- Pilih Akun SAK EP --</option>
+                          {['ASET', 'KEWAJIBAN', 'PENDAPATAN', 'BEBAN'].map(cat => (
+                            <optgroup key={cat} label={cat}>
+                              {MASTER_AKUN_SAK_EP.filter(a => a.kategori === cat).map(acc => (
+                                <option key={acc.kode} value={acc.kode}>{acc.nama} ({acc.kode})</option>
+                              ))}
+                            </optgroup>
+                          ))}
+                        </select>
+                        <div className="absolute right-3 top-3 pointer-events-none text-slate-400">▼</div>
+                      </div>
+                      <button onClick={addMapping} className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded font-bold shadow-sm transition">SIMPAN</button>
+                    </div>
+                 </div>
+              </div>
+
+              <div className="border rounded-lg overflow-hidden shadow-sm">
+                <table className="w-full text-sm text-left">
+                  <thead className="bg-slate-100 text-slate-600 font-bold uppercase text-xs">
+                    <tr>
+                      <th className="p-3 w-1/3">Kata Kunci (Bank)</th>
+                      <th className="p-3 w-1/3">Akun SAK EP</th>
+                      <th className="p-3 w-1/6">Kode</th>
+                      <th className="p-3 text-center">Hapus</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {mappings.map((m) => (
+                      <tr key={m.id} className="hover:bg-slate-50 transition">
+                        <td className="p-3 font-mono font-bold text-blue-700">{m.keyword}</td>
+                        <td className="p-3 text-slate-700">{m.akun}</td>
+                        <td className="p-3 font-mono text-slate-500">{m.kode}</td>
+                        <td className="p-3 text-center">
+                          <button onClick={() => removeMapping(m.id)} className="text-slate-300 hover:text-red-500 transition"><Trash2 className="w-4 h-4 mx-auto" /></button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 3: RESULT & EDIT */}
+          {activeTab === 'result' && (
+            <div>
+              {fileData.length === 0 ? (
+                <div className="text-center py-20 text-slate-400 flex flex-col items-center">
+                  <Search className="w-12 h-12 mb-2 opacity-20" />
+                  <p>Belum ada data. Silakan upload file CSV di Tab 1.</p>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  {/* SUMMARY & TOOLS */}
+                  <div className="flex flex-wrap justify-between items-end gap-4 bg-slate-50 p-4 rounded-lg border border-slate-200">
+                     <div className="flex gap-4">
+                        <div className="text-center px-4 border-r border-slate-300">
+                           <div className="text-2xl font-bold text-slate-700">{processedData.masuk.length + processedData.keluar.length}</div>
+                           <div className="text-xs text-slate-500 uppercase tracking-wide">Total Transaksi</div>
+                        </div>
+                        <div className={`text-center px-4 ${unidentifiedCount > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                           <div className="text-2xl font-bold">{unidentifiedCount}</div>
+                           <div className="text-xs uppercase tracking-wide">Perlu Cek Manual</div>
+                        </div>
+                     </div>
+                     
+                     <div className="flex gap-2">
+                        {/* FILTER BUTTON */}
+                        <button 
+                           onClick={() => setShowOnlyManual(!showOnlyManual)}
+                           className={`flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-sm border transition ${showOnlyManual ? 'bg-red-100 border-red-300 text-red-700' : 'bg-white border-slate-300 text-slate-600 hover:bg-slate-100'}`}
+                        >
+                           <Filter className="w-4 h-4" />
+                           {showOnlyManual ? 'Tampilkan Semua' : 'Fokus Cek Manual'}
+                        </button>
+                     </div>
+                  </div>
+
+                  {/* TABEL EDITOR */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    {['masuk', 'keluar'].map(type => {
+                      const dataList = processedData[type];
+                      const filteredList = showOnlyManual 
+                         ? dataList.filter(item => item.kode_lawan === 'CEK')
+                         : dataList;
+                      
+                      return (
+                        <div key={type} className={`border rounded-xl shadow-sm flex flex-col h-[600px] ${type === 'masuk' ? 'border-green-200' : 'border-orange-200'}`}>
+                          {/* Card Header */}
+                          <div className={`p-4 border-b flex justify-between items-center ${type === 'masuk' ? 'bg-green-50 border-green-200' : 'bg-orange-50 border-orange-200'}`}>
+                             <div>
+                                <h4 className={`font-bold uppercase flex items-center gap-2 ${type === 'masuk' ? 'text-green-800' : 'text-orange-800'}`}>
+                                   {type === 'masuk' ? <ArrowRight className="w-4 h-4 rotate-180"/> : <ArrowRight className="w-4 h-4"/>}
+                                   Kas {type} ({filteredList.length})
+                                </h4>
+                             </div>
+                             <button 
+                                onClick={() => downloadCSV(dataList, `Jurnal_Kas_${type}.csv`)}
+                                className={`text-xs px-3 py-1.5 rounded text-white font-bold flex items-center gap-1 shadow-sm ${type === 'masuk' ? 'bg-green-600 hover:bg-green-700' : 'bg-orange-600 hover:bg-orange-700'}`}
+                             >
+                               <Download className="w-3 h-3" /> CSV
+                             </button>
+                          </div>
+
+                          {/* Table Area */}
+                          <div className="flex-1 overflow-auto bg-white relative">
+                             {filteredList.length === 0 ? (
+                                <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-400">
+                                   <CheckCircle className="w-12 h-12 mb-2 opacity-20" />
+                                   <p className="text-sm">Tidak ada data untuk ditampilkan</p>
+                                </div>
+                             ) : (
+                                <table className="w-full text-xs text-left">
+                                  <thead className="bg-slate-100 sticky top-0 z-10 font-bold text-slate-600 shadow-sm">
+                                    <tr>
+                                      <th className="p-2 w-[80px]">Tanggal</th>
+                                      <th className="p-2 w-[180px]">Uraian Bank</th>
+                                      <th className="p-2">Akun Lawan (Edit Disini)</th>
+                                      <th className="p-2 w-[90px] text-right">Jumlah</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody className="divide-y divide-slate-100">
+                                    {filteredList.map((row) => {
+                                      const isManual = row.kode_lawan === "CEK";
+                                      return (
+                                        <tr key={row.id} className={isManual ? 'bg-red-50' : 'hover:bg-slate-50'}>
+                                          <td className="p-2 align-top text-slate-500">{row.tanggal}</td>
+                                          <td className="p-2 align-top text-slate-700" title={row.uraian}>
+                                             <div className="line-clamp-2">{row.uraian}</div>
+                                          </td>
+                                          <td className="p-2 align-top">
+                                             {/* LIVE EDITOR DROPDOWN */}
+                                             <div className="relative">
+                                                <select
+                                                   className={`w-full border rounded px-2 py-1 appearance-none cursor-pointer focus:outline-none focus:ring-1 focus:ring-blue-500 transition
+                                                      ${isManual ? 'border-red-300 bg-red-100 text-red-800 font-bold' : 'border-slate-200 bg-white text-slate-700'}
+                                                   `}
+                                                   value={isManual ? "" : row.kode_lawan}
+                                                   onChange={(e) => handleEditRow(type, row.id, e.target.value)}
+                                                >
+                                                   <option value="" disabled>-- Pilih Akun --</option>
+                                                   {['ASET', 'KEWAJIBAN', 'PENDAPATAN', 'BEBAN'].map(cat => (
+                                                      <optgroup key={cat} label={cat}>
+                                                         {MASTER_AKUN_SAK_EP.filter(a => a.kategori === cat).map(acc => (
+                                                            <option key={acc.kode} value={acc.kode}>{acc.nama}</option>
+                                                         ))}
+                                                      </optgroup>
+                                                   ))}
+                                                </select>
+                                                {/* Code Display Badge */}
+                                                {!isManual && (
+                                                   <div className="text-[10px] text-slate-400 mt-1 font-mono pl-1">
+                                                      Kode: {row.kode_lawan}
+                                                   </div>
+                                                )}
+                                             </div>
+                                          </td>
+                                          <td className="p-2 align-top text-right font-mono font-medium">
+                                             {row.jumlah.toLocaleString('id-ID')}
+                                          </td>
+                                        </tr>
+                                      );
+                                    })}
+                                  </tbody>
+                                </table>
+                             )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                </div>
+              )}
+            </div>
+          )}
+
+        </div>
+      </div>
+    </div>
+  );
+}
